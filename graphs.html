@@ -1,0 +1,680 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        padding: 5px;
+      }
+
+      label {
+        padding: 4px;
+      }
+
+      input {
+        padding: 4px;
+      }
+
+      select {
+        padding: 4px;
+      }
+
+      div.instructions {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 800px;
+        height: 100px;
+      }
+
+      div.controls {
+        position: absolute;
+        top: 125px;
+        left: 10px;
+        width: 200px;
+        height: 600px;
+      }
+
+      canvas {
+        position: absolute;
+        top: 125px;
+        left: 175px;
+        border: 2px solid #000000; 
+      }
+
+      div.editModeLabel {
+        position: absolute;
+        top: 60px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+      }
+
+      div.editMode {
+        position: absolute;
+        top: 85px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+      }
+
+      div.labelModeLabel {
+        position: absolute;
+        top: 160px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+      }
+
+      div.labelMode {
+        position: absolute;
+        top: 180px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+      }
+
+      div.quickLabelLabel {
+        position: absolute;
+        top: 250px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+        /* border: 3px solid #73AD21; */
+      }
+
+      div.quickLabelMode {
+        position: absolute;
+        top: 270px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+        /* border: 3px solid #73AD21; */
+      }
+
+      div.displayOpts {
+        position: absolute;
+        top: 310px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+      }
+
+      div.nodeColor {
+        position: absolute;
+        top: 370px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+      }
+
+      div.clearButton {
+        position: absolute;
+        top: 500px;
+        left: 0px;
+        width: 100px;
+        height: 100px;
+        /* border: 3px solid #73AD21; */
+      }
+      
+      #clear {
+        width: 150px;
+        height: 40px;
+      }
+
+      #generate_random {
+        width: 150px;
+        height: 40px;
+      }
+
+      #run_alg {
+        width: 150px;
+        height: 40px;
+      }
+
+      #clear_alg {
+        width: 150px;
+        height: 40px;
+      }
+
+      div.label_wgt_popup {
+        display: none;
+        position: fixed;
+        top: 40%;
+        left: 40%;
+        background-color: rgba(200, 200, 200, 1.0);
+        z-index: 1;
+      }
+
+      div.tools {
+        position: absolute;
+        top: 100px;
+        left: 1000px;
+      }
+
+      #alg_results {
+        position: absolute;
+        top: 750px;
+        left: 200px;
+        width: 700px;
+        height: 150px;
+      }
+
+      #alg_desc {
+        width: 300px;
+        height: 100px;
+        /*
+        top: 500px;
+        left: 1000px;
+        width: 300px;
+        height: 300px;
+        */
+      }
+
+      #alg_log {
+        /* position: absolute; */
+        width: 300px;
+        height: 300px;
+        /*
+        top: 500px;
+        left: 1000px;
+        width: 300px;
+        height: 300px;
+        */
+      }
+      
+    </style>
+  </head>
+  <body>
+    <div class="label_wgt_popup" id="label_wgt_form">
+      <fieldset>
+        <label for="ne_label">Label:</label>
+        <input type="text" name="ne_label" id="ne_label" value="A" class="text" size=20><br/>
+        <label for="Weight">Weight:</label>
+        <input type="text" name="ne_weight" id="ne_weight" value="0" class="text" size=5><br/>
+        <label for="Radius">Radius:</label>
+        <input type="text" name="ne_radius" id="ne_radius" value="0" class="text" size=3><br/>
+        <button id="label_wgt_popup_ok">OK</button>
+      </fieldset>
+    </div>
+
+    <div class="instructions"> 
+        Instructions:<br/>
+        Click anywhere in the box to add a new mode, while in 'Place' mode<br/>
+        To join nodes, in 'Place' mode, click on one and then another. Arrow type will depend on option selected in 'Arrow'<br/>
+        Right click to delete a node or edge<br>
+        To edit a node properties, such as radius, click on node in 'Edit' mode 
+    </div>
+    <div class="controls"> 
+        <div class="options1">
+            <label for="nodeRadius">Node radius:</label>
+            <input id="nodeRadius" size=2 value="20"></input><br/>
+            <label for="arrowDir"><b>Arrow:</b></label>
+            <select id="arrowDir">
+                <option value="None">None</option>
+                <option value="Dest" selected>Dest</option>
+                <option value="Source">Souce</option>
+                <option value="Bidir">Both</option>
+                <option value="Two">Two arrows</option>
+            </select><br/>
+            <div class="editModeLabel">
+                <b>Mode:</b>
+            </div>
+            <div class="editMode">
+                <input type="radio" id="mode_place" name="edit_mode" value="mode_place"  checked=True>
+                <label for="mode_place">Place</label><br/>
+                <input type="radio" id="mode_move" name="edit_mode" value="mode_move">
+                <label for="mode_move">Move</label><br/>
+                <input type="radio" id="mode_label" name="edit_mode" value="mode_label">
+                <label for="mode_label">Edit</label>
+            </div>
+            <!---
+                <label for="mode">Mode:</label>
+            <select id="mode">
+                <option value="Place">Place</option>
+                <option value="Move">Move</option>
+                <option value="Label">Label</option>
+            </select>
+            -->
+            <div class="labelModeLabel">
+                <b>Label mode:</b>
+            </div>
+            <div class="labelMode">
+                <input type="radio" id="labelmode_none" name="labelMode" value="labelmode_none">
+                <label for="labelmode_none">None</label><br/>
+                <input type="radio" id="labelmode_quick" name="labelMode" value="labelmode_quick" checked=True>
+                <label for="labelmode_quick">Quick</label><br/>
+                <input type="radio" id="labelmode_custom" name="labelMode" value="labelmode_custom">
+                <label for="labelmode_custom">Custom</label>
+                
+                <!---
+                <label for="labelMode">Label Mode:</label>
+                <select id="labelMode">
+                    <option value="None">None</option>
+                    <option value="Quick" selected>Quick</option>
+                    <option value="Custom">Custom</option>
+                </select>
+                -->
+            </div>
+        </div>
+        <div class="quickLabelLabel">
+            <b>Quick Label:</b>
+        </div>
+        <div class="quickLabelMode">
+            <input type="radio" id="lbl_number" name="quicklabel" value="lbl_number" checked=True>
+            <label for="lbl_number">Number</label><br/>
+            <input type="radio" id="lbl_char" name="quicklabel" value="lbl_char">
+            <label for="lbl_char">Character</label>
+        </div>
+        <div class="displayOpts">
+            <b>Display:</b><br/>
+            <input type="checkbox" id="show_edge_weights" name="showEdgeWeights" value="show_edge_weights">Edge Weights</input><br/>
+            <input type="checkbox" id="show_node_weights" name="showNodeWeights" value="show_node_weights">Node Weights</input>
+        </div>
+        <div class="nodeColor">
+          Node color:<br/>
+          <select id="node_color_select">            
+          </select><br/>
+          <input type="color" id="node_color" name="node_color" size=1 value="#FFECA6">
+        </div>
+
+        <div class="clearButton">
+            <button id="clear" width=150>Clear</button>
+          </div>      
+      </div> <!--- options1 -->
+    </div> <!--  contorls-->
+
+    <div class="tools">
+      <!--
+      <select id="Algorithm">
+        <option value="None">None</option>
+        <option value="Dest" selected>Dest</option>
+        <option value="Source">Souce</option>
+        <option value="Bidir">Both</option>
+        <option value="Two">Two arrows</option>
+      </select><br/>
+    -->
+      <p><h3>Random Graph:</h3></p>
+      Stategy:
+      <select id="rnd_strategy">
+        <option value="Grid" selected>Grid</option>
+        <option value="Ring">Ring</option>
+      </select>
+      <label for="rnd_num_nodes">Nodes:</label>
+      <input type="text" name="rnd_num_nodes" id="rnd_num_nodes" value="20" class="text" size=2><br/>
+       Edges Per Node:<br/>
+      <label for="rnd_edge_min">Min:</label>
+      <input type="text" name="rnd_edge_min" id="rnd_edge_min" value="2" class="text" size=2>
+      <label for="rnd_edge_max">Max:</label>
+      <input type="text" name="rnd_edge_max" id="rnd_edge_max" value="4" class="text" size=2><br/>
+      <input type="checkbox" id="rnd_use_edge_wgt">Use Edge Weights</input><br/>
+      <label for="rnd_edge_wgt_min">Min:</label>
+      <input type="text" name="rnd_edge_wgt_min" id="rnd_edge_wgt_min" value="1" class="text" size=2 disabled>
+      <label for="rnd_edge_wgt_max">Max:</label>
+      <input type="text" name="rnd_edge_wgt_max" id="rnd_edge_wgt_max" value="10" class="text" size=2 disabled><br/>
+      <button id="generate_random" width=150 height=50>Generate</button><br/>
+
+      <p><h3>Algorithm:</h3></p>
+      <select id="algorithm">
+        <option value="Transpose" selected>Transpose</option>
+        <option value="DFS">Depth First Search</option>
+        <option value="BFS">Breadth First Search</option>
+        <option value="SCC">Strongly connected components</option>
+        <option value="Top_Sort">Topological sort</option>
+        <option value="MinSpan_Prim">Minimum Spanning Tree (Prim)</option>
+        <option value="SSSP_Djk">Single Source Shortest Path (Djikstra)</option>
+        <option value="SSSP_Djk">Single Source Shortest Path (Bellman-Ford)</option>
+        <option value="AP_Djk">All Pairs Shortest Path (Floyd Warshall)</option>
+        <option value="Ham_cycle">Hamiltonian cycle</option>
+        <option value="Euler_Tour">Euler tour</option>
+        <option value="TSP">Travelling salesman problem</option>
+      </select><br/>
+
+      <textarea id="alg_desc">Algorithm description</textarea><br/>
+
+      <input type="radio" id="alg_show" name="alg_show_opt" value="alg_show"  checked=True>
+      <label for="alg_show">Show me whats going on</label><br/>
+      <input type="radio" id="alg_quiet" name="alg_show_opt" value="alg_quiet">
+      <label for="alg_quiet">Just run</label><br/>
+      
+      <button id="run_alg">Run</button><button id="clear_alg">Clear</button><br/><br/>
+      <textarea id="alg_log">Algorithm log</textarea>
+    </div>
+
+    <textarea id="alg_results" >Algorithm results</textarea>
+    
+
+
+
+    <!---
+    <label for="quickLabel">Quick label:</label>
+    <select id="quickLabel">
+        <option value="Number">Number</option>
+        <option value="Alphabet">Alphabet</option>
+    </select>
+    -->
+  
+    <br/>
+    <canvas id="myCanvas" width=800 height=600></canvas>
+
+    
+    <script type="text/javascript"
+        src="node.js" >
+    </script>
+    <script type="text/javascript"
+        src="edge.js" >
+    </script>
+    <script type="text/javascript"
+        src="graphs.js" >
+    </script>
+    <script type="text/javascript"
+        src="algorithms_1.js" >
+    </script>
+    
+    <script>
+       const CANVAS_WIDTH = 800;
+       const CANVAS_HEIGHT = 600;
+
+       var labelObj;
+       var graph = new Graph();
+
+       var algorithms = [];
+
+       algorithms.push(new TransposeAlg());
+       algorithms.push(new DFSAlg());
+       algorithms.push(new BFSAlg());
+       algorithms.push(new SCCAlg());
+
+        const CSS_COLORS = {"AliceBlue":"#f0f8ff","AntiqueWhite":"#faebd7","Aqua":"#00ffff","Aquamarine":"#7fffd4","Azure":"#f0ffff",
+          "Beige":"#f5f5dc","Bisque":"#ffe4c4","Black":"#000000","BlanchedAlmond":"#ffebcd","Blue":"#0000ff","BlueViolet":"#8a2be2","Brown":"#a52a2a",
+          "Burlywood":"#deb887","CadetBlue":"#5f9ea0","Chartreuse":"#7fff00","Chocolate":"#d2691e","Coral":"#ff7f50","Cornflowerblue":"#6495ed","Cornsilk":"#fff8dc",
+          "Crimson":"#dc143c","Cyan":"#00ffff","Darkblue":"#00008b","Darkcyan":"#008b8b","Darkgoldenrod":"#b8860b","Darkgray":"#a9a9a9","Darkgreen":"#006400",
+          "DarkKhaki":"#bdb76b","Darkmagenta":"#8b008b","darkolivegreen":"#556b2f","darkorange":"#ff8c00","Darkorchid":"#9932cc","Darkred":"#8b0000",
+          "DarkSalmon":"#e9967a","Darkseagreen":"#8fbc8f","darkslateblue":"#483d8b","darkslategray":"#2f4f4f","Darkturquoise":"#00ced1",
+          "Darkviolet":"#9400d3","Deeppink":"#ff1493","Deepskyblue":"#00bfff","dimgray":"#696969","dodgerblue":"#1e90ff",
+          "Firebrick":"#b22222","Floralwhite":"#fffaf0","Forestgreen":"#228b22","fuchsia":"#ff00ff",
+          "Gainsboro":"#dcdcdc","Ghostwhite":"#f8f8ff","gold":"#ffd700","goldenrod":"#daa520","gray":"#808080","green":"#008000","greenyellow":"#adff2f",
+          "Honeydew":"#f0fff0","hotpink":"#ff69b4","indianred ":"#cd5c5c","indigo":"#4b0082","ivory":"#fffff0","khaki":"#f0e68c",
+          "Lavender":"#e6e6fa","lavenderblush":"#fff0f5","lawngreen":"#7cfc00","LemonChiffon":"#fffacd","lightblue":"#add8e6","lightcoral":"#f08080","lightcyan":"#e0ffff",
+          "Lightgoldenrodyellow":"#fafad2","lightgrey":"#d3d3d3","lightgreen":"#90ee90","lightpink":"#ffb6c1","lightsalmon":"#ffa07a","lightseagreen":"#20b2aa",
+          "Lightskyblue":"#87cefa","lightslategray":"#778899","lightsteelblue":"#b0c4de","lightyellow":"#ffffe0","lime":"#00ff00","limegreen":"#32cd32","linen":"#faf0e6",
+          "Magenta":"#ff00ff","maroon":"#800000","mediumaquamarine":"#66cdaa","mediumblue":"#0000cd","mediumorchid":"#ba55d3","mediumpurple":"#9370d8",
+          "Mediumseagreen":"#3cb371","mediumslateblue":"#7b68ee","mediumspringgreen":"#00fa9a","mediumturquoise":"#48d1cc","mediumvioletred":"#c71585",
+          "Midnightblue":"#191970","mintcream":"#f5fffa","mistyrose":"#ffe4e1","moccasin":"#ffe4b5",
+          "Navajowhite":"#ffdead","navy":"#000080","oldlace":"#fdf5e6","olive":"#808000","olivedrab":"#6b8e23","Orange":"#ffa500","Orangered":"#ff4500","Orchid":"#da70d6",
+          "Palegoldenrod":"#eee8aa","Palegreen":"#98fb98","Paleturquoise":"#afeeee","Palevioletred":"#d87093","Papayawhip":"#ffefd5","Peachpuff":"#ffdab9",
+          "Peru":"#cd853f","Pink":"#ffc0cb","Plum":"#dda0dd","Powderblue":"#b0e0e6","Purple":"#800080",
+          "Rebeccapurple":"#663399","Red":"#ff0000","Rosybrown":"#bc8f8f","Royalblue":"#4169e1",
+          "Saddlebrown":"#8b4513","Salmon":"#fa8072","Sandybrown":"#f4a460","Seagreen":"#2e8b57","Seashell":"#fff5ee","Sienna":"#a0522d","Silver":"#c0c0c0",
+          "Skyblue":"#87ceeb","Slateblue":"#6a5acd","Slategray":"#708090","Snow":"#fffafa","Springgreen":"#00ff7f","Steelblue":"#4682b4",
+          "Tan":"#d2b48c","Teal":"#008080","Thistle":"#d8bfd8","Tomato":"#ff6347","Turquoise":"#40e0d0",
+          "Violet":"#ee82ee","Wheat":"#f5deb3","White":"#ffffff","Whitesmoke":"#f5f5f5","Yellow":"#ffff00","Yellowgreen":"#9acd32"};
+
+
+       var canvas = document.getElementById('myCanvas');
+       var context = canvas.getContext('2d');
+
+/*
+        function rgbToHex(r, g, b) {
+           return "#" + ((r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+*/
+    
+      function writeMessage(canvas, message) {
+            var context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.font = '18pt Calibri';
+            context.fillStyle = 'black';
+            context.fillText(message, 10, 25);
+      }
+
+      function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+            };
+      }
+   
+
+
+      function getEditMode() {
+          var editMode = MODE_PLACE;
+          if(document.getElementById('mode_move').checked) {
+              editMode = MODE_MOVE;
+          }
+          else if(document.getElementById('mode_label').checked) {
+              editMode = MODE_LABEL;
+          }
+
+          return editMode;
+      }
+
+      function getLabelMode() {
+          var labelMode = LABEL_MODE_QUICK; // = el.selectedIndex;
+          if(document.getElementById('labelmode_none').checked) {
+              labelMode = LABEL_MODE_NONE;
+          }
+          else if(document.getElementById('labelmode_custom').checked) {
+              labelMode = LABEL_MODE_CUSTOM;
+          }
+
+          return labelMode;
+      }
+
+      function labelWeightPopupClick() {
+          var label = document.getElementById("ne_label").value;
+          var wgt = parseInt(document.getElementById("ne_weight").value);
+          var rad = parseInt(document.getElementById("ne_radius").value);
+          console.log('labelWeightPopupClick label= ', label, ' wgt=', wgt);
+          document.getElementById("label_wgt_form").style.display = "none";            
+          labelObj.label = label;
+          labelObj.weight = wgt;
+          labelObj.rad = rad;
+          nodeNum = labelObj.nodeNum;
+
+          graph.updateEdgePoints();
+          labelObj = null;
+          graph.redraw(canvas);
+      }
+
+      function rndGraphEdgeWeightClick() {
+          var isChecked = document.getElementById('rnd_use_edge_wgt').checked;
+          document.getElementById('rnd_edge_wgt_min').disabled = !isChecked;
+          document.getElementById('rnd_edge_wgt_max').disabled = !isChecked;
+      }
+
+
+      canvas.addEventListener('mousemove', function(evt) {
+        var mousePos = getMousePos(canvas, evt);
+        // var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+        // writeMessage(canvas, message);
+
+        // var el = document.getElementById('mode');
+        var editMode = getEditMode();
+
+        if(editMode == MODE_MOVE) {
+            if(graph.objSel != null) {
+                graph.handleNodeMove(mousePos);
+            }
+        }
+
+        graph.redraw(canvas)
+      }, false);
+
+      canvas.addEventListener('click', function(evt) {
+        var mousePos = getMousePos(canvas, evt);
+        // var message = 'Mouse click';
+        // writeMessage(canvas, message);
+        
+        // ctx.moveTo(mousePos.x, mousePos.y);
+        var editMode = getEditMode(); 
+        var labelMode = getLabelMode();
+
+        // el = document.getElementById('lbl_number').checked;
+        var quickLabelMode = QUICK_LABEL_NUMBER;
+        if(document.getElementById('lbl_char').checked) {
+            quickLabelMode = QUICK_LABEL_CHAR;
+        }
+        var rad = parseInt(document.getElementById('nodeRadius').value);
+
+        // var quickLabel = document.getElementById('quickLabelMode').selectedValue;
+        console.log('mode= ', editMode, ' labelMode= ', labelMode, ' radi=', rad);
+        var el = document.getElementById('arrowDir');
+        var arrowDir = el.selectedIndex;
+        //print(console.log('arrowDir= ', arrowDir));
+
+        // determine if click hit an object
+        var obj = graph.HitTestAllObjs(mousePos);
+        console.log("HitTestAllObjs returned obj=", obj);
+        el = document.getElementById('node_color');
+        var color = el.value;
+
+        if(editMode == MODE_PLACE) {
+            if(obj != null) {
+                // console.log("objSel=", objSel)
+                graph.handleObjClicked(obj, arrowDir);
+            }
+            else {
+                graph.handleAddNode(mousePos, labelMode, quickLabelMode, rad, color);
+            }
+        } 
+        else if(editMode == MODE_MOVE) {
+            if(obj != null) {
+                obj.toggleSel();
+                graph.objSel = null;
+                if(obj.isSel) {
+                    graph.objSel = obj;
+                } 
+            } else {
+                // handleNodeMove(mousePos);
+            }
+        }
+        else if(editMode == MODE_LABEL) {
+          labelObj = obj;
+          if(obj != null) {
+            if(obj.objType() == NODE) {
+              document.getElementById("ne_label").value = obj.label;
+              document.getElementById("ne_weight").value = obj.weight.toString();
+              console.log("obj.rad= ", obj.rad);
+              document.getElementById("ne_radius").value = obj.rad.toString();
+              console.log("ne_radius.value= ", document.getElementById("ne_radius").value);
+              document.getElementById("label_wgt_form").style.display = "block";
+            }
+          }
+        }
+
+        graph.redraw(canvas);
+
+        return false;
+      }, false);
+
+      // delete node or edge
+      canvas.addEventListener('contextmenu', function(evt) {
+        evt.preventDefault();
+        // alert('success!');
+        var mousePos = getMousePos(canvas, evt);
+        var obj = graph.HitTestAllObjs(mousePos);
+        console.log("HitTestAllObjs returned obj=", obj);
+        if(obj != null) {
+            // delete node
+            if(obj.objType() == NODE) {
+                graph.handleDeleteNode(obj);
+            }
+
+            else if(obj.objType() == EDGE) {
+                graph.handleDeleteEdge(obj);
+            }
+        }
+        graph.redraw(canvas);
+
+        return false;
+      }, false);
+
+      document.getElementById('clear').onclick = function () { graph.clearNodes(); }
+      document.getElementById('label_wgt_popup_ok').onclick= function () { graph.labelWeightPopupClick(); }
+      document.getElementById('rnd_use_edge_wgt').onclick= function () { rndGraphEdgeWeightClick(); }
+      document.getElementById('generate_random').onclick = function () { graph.generateRandomGraph(canvas); }
+
+      // populate colors seleector 
+      var el = document.getElementById('node_color_select');
+      var str = '';
+      for(var c in CSS_COLORS) {
+          // console.log('c= ', c);
+          if(c == 'LemonChiffon')
+            str += '<option value="' + c + '" selected>' + c + '</option>';      
+          else
+            str += '<option value="' + c + '">' + c + '</option>';      
+      }
+      el.innerHTML = str;
+      el.onchange = function () {
+        var el2 = document.getElementById('node_color_select');
+        var cval = CSS_COLORS[el2.value];
+        var el3 = document.getElementById('node_color');
+        el3.value = cval;
+      }
+      el.onchange();
+
+      // document.getElementById('node_color').value = CSS_COLORS['LemonChiffon'];      
+
+      // update algorithm description when user selects different one
+      el = document.getElementById('algorithm');
+      el.onchange = function () {
+        var el2 = document.getElementById('alg_desc');
+        var idx = document.getElementById('algorithm').selectedIndex;
+        el2.innerText = algorithms[idx].description; // el.value;
+      }
+
+      el.onchange();  // load description into text area
+
+      document.getElementById('run_alg').onclick = function () { 
+          var el2 = document.getElementById('algorithm');
+          var resultsTxt = document.getElementById('alg_results');
+          var logTxt = document.getElementById('alg_log');
+          var show = document.getElementById('alg_show').checked;
+          algorithms[el2.selectedIndex].run(graph, show, canvas, logTxt, resultsTxt);
+        }
+
+        document.getElementById('clear_alg').onclick = function () { 
+          document.getElementById('alg_results').innerText = '';
+          document.getElementById('alg_log').innerText = '';
+          graph.allNodes.forEach(nd => { 
+              if(nd != null) {
+                nd.color = nd.origcolor; 
+              }
+          });
+          graph.redraw(canvas); 
+        }
+
+        var color = document.getElementById('node_color').value;
+        // add some default nodes
+        rad = 20;
+        pos = { x: 100,  y: 100 };
+        graph.handleAddNode(pos, LABEL_MODE_QUICK, QUICK_LABEL_NUMBER, rad, color);
+        pos = { x: 300,  y: 200 };
+        graph.handleAddNode(pos, LABEL_MODE_QUICK, QUICK_LABEL_NUMBER, rad, color);
+        pos = { x: 150,  y: 300 };
+        graph.handleAddNode(pos, LABEL_MODE_QUICK, QUICK_LABEL_NUMBER, rad, color);
+        pos = { x: 450,  y: 150 };
+        graph.handleAddNode(pos, LABEL_MODE_QUICK, QUICK_LABEL_NUMBER, rad, color);
+        pos = { x: 500,  y: 250 };
+        graph.handleAddNode(pos, LABEL_MODE_QUICK, QUICK_LABEL_NUMBER, rad, color);
+        pos = { x: 475,  y: 450 };
+        graph.handleAddNode(pos, LABEL_MODE_QUICK, QUICK_LABEL_NUMBER, rad, color);
+        nd1 = graph.allNodes[0];
+        nd2 = graph.allNodes[1];
+        nd3 = graph.allNodes[2];
+        nd4 = graph.allNodes[3];
+        nd5 = graph.allNodes[4];
+        nd6 = graph.allNodes[5];
+        graph.connectNodes(nd1, nd2, ARROW_TYPE_DST);
+        graph.connectNodes(nd2, nd3, ARROW_TYPE_DST);
+        graph.connectNodes(nd3, nd1, ARROW_TYPE_DST);
+        graph.connectNodes(nd1, nd4, ARROW_TYPE_DST);
+        graph.connectNodes(nd4, nd5, ARROW_TYPE_DST);
+        graph.connectNodes(nd3, nd5, ARROW_TYPE_DST);
+        graph.connectNodes(nd6, nd5, ARROW_TYPE_DST);
+        graph.redraw(canvas);
+        
+    </script>
+  </body>
+</html>
