@@ -1,5 +1,8 @@
 // const HIT_TOL = 10;
 
+const EDGE_COLOR = "#000000";
+const EDGE_SELECT_COLOR = "#A0A000";
+
 function Edge(nd1, nd2, edgeNum, allNodes, arrowDir=ARROW_TYPE_NONE) {
     this.pt1 = { x : 0, y : 0 };
     this.pt2 = { x : 0, y : 0 };
@@ -8,20 +11,41 @@ function Edge(nd1, nd2, edgeNum, allNodes, arrowDir=ARROW_TYPE_NONE) {
     this.edgeNum = edgeNum;
     this.nodes = [nd1, nd2];
     this.weight = [0, 0];
+    this.color = EDGE_COLOR;
     this.updatePoints(allNodes);
 }
 
 Edge.prototype.draw = function (ctx, showWeights=false) {
+
     // console.log('Edge.draw edgeNum= ', this.edgeNum, ' nodes= ', this.nodes, ' arrowDir=', this.arrowDir);
     ctx.beginPath();
 
+    
+    
     var x1 = this.pt1.x;
     var y1 = this.pt1.y
     var x2 = this.pt2.x;
     var y2 = this.pt2.y;
+
+    if(this.isSel) {
+        clr = EDGE_SELECT_COLOR;
+        ctx.fillStyle = clr;
+        ctx.strokeStyle = clr;
+    
+        ctx.lineWidth = 4;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+    ctx.lineWidth = 1;
+    clr = EDGE_COLOR;
+    ctx.fillStyle = clr;
+    ctx.strokeStyle = clr;
+
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
+
 
     var ang = Math.atan((y2-y1)/(x2-x1));
 
@@ -50,7 +74,7 @@ Edge.prototype.draw = function (ctx, showWeights=false) {
         }
 
         // draw arrow at source
-        if(this.arrowDir == ARROW_TYPE_SRC || this.arrowDir == ARROW_TYPE_BIDIR) {
+        if(this.arrowDir == ARROW_TYPE_BIDIR) {
             ctx.beginPath();
             ctx.moveTo(x1, y1);
             ctx.lineTo(x1 + dxP, y1 + dyP);
@@ -86,6 +110,38 @@ Edge.prototype.draw = function (ctx, showWeights=false) {
     }
 }
 
+function pDistance(x, y, x1, y1, x2, y2) {
+    var A = x - x1;
+    var B = y - y1;
+    var C = x2 - x1;
+    var D = y2 - y1;
+  
+    var dot = A * C + B * D;
+    var len_sq = C * C + D * D;
+    var param = -1;
+    if (len_sq != 0) //in case of 0 length line
+        param = dot / len_sq;
+  
+    var xx, yy;
+  
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    }
+    else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    }
+    else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+  
+    var dx = x - xx;
+    var dy = y - yy;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
 Edge.prototype.hitTest = function (pt) {
     var x1 = this.pt1.x;
     var y1 = this.pt1.y
@@ -94,10 +150,14 @@ Edge.prototype.hitTest = function (pt) {
     var x0 = pt.x;
     var y0 = pt.y;
 
+    /*
     var a = (y2 - y1)*x0 - (x2 - x1)*y0 + x2*y1 - y2*x1;
     var b = Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2));
     var d = Math.abs(a / b);
     console.log('edge hitTest d= ', d);
+*/
+
+    d = pDistance(pt.x, pt.y, x1, y1, x2, y2);
     if (d < HIT_TOL) {
         return true;
     }

@@ -93,6 +93,8 @@ function Node(ctr, radius, nodeNum) {
     this.weight = 0;
     this.color = "#F0F0FF";
     this.origcolor = "#F0F0FF";
+    this.inDeg = 0;
+    this.outDeg = 0;
 }
 
 Node.prototype.objType = function() {
@@ -121,6 +123,7 @@ Node.prototype.draw = function(ctx) {
         ctx.strokeStyle = NODE_OUTLINE_COLOR;
     }
 
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(this.ctr.x, this.ctr.y, this.rad, 0,2*Math.PI);
 

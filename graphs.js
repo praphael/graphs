@@ -2,15 +2,15 @@ const NODE = 0;
 const EDGE = 1;
 const ARROW_TYPE_NONE = 0;
 const ARROW_TYPE_DST = 1;
-const ARROW_TYPE_SRC = 2;
-const ARROW_TYPE_BIDIR = 3;
-const ARROW_TYPE_TWO = 4;
+const ARROW_TYPE_BIDIR = 2;
+const ARROW_TYPE_TWO = 3;
 const ARROW_LEN = 10;
 const LINE_NODE_SPACING = 2;
 
 // strategies for random grid
 const STRATEGY_GRID = 0;
 const STRATEGY_RING = 1;
+const STRATEGY_TREE = 2;
 
 const MODE_PLACE = 0;
 const MODE_MOVE = 1;
@@ -30,6 +30,44 @@ function calcDist(x1, y1, x2, y2) {
 
 function ptDist(pt1, pt2) {
     return Math.abs(Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2)));
+}
+
+function Queue() { 
+    this.q = [];
+}
+
+Queue.prototype.push = function(x) {
+    this.q.push(x);
+}
+
+Queue.prototype.pop = function() {
+    if(this.q.length > 0) {
+        x = this.q[0];
+        for(var i=0; i<this.q.length-1; i++)
+            this.q[i] = this.q[i+1];
+        this.q.pop(); // remove last element
+        return x;
+    }
+    else return null;
+}
+
+Queue.prototype.remove = function(idx) {
+    if(idx < this.q.length) {
+        for(var i=idx; i<this.q.length-1; i++)
+            this.q[i] = this.q[i+1];
+        this.q.pop(); // remove last element
+        return x;
+    }
+    else return null;
+}
+
+Queue.prototype.removeRandom = function() {
+    var idx = Math.floor(Math.random() * this.q.length);
+    return this.remove(idx);
+}
+
+Queue.prototype.empty = function() {
+    return (this.q.length == 0);
 }
 
 
@@ -134,8 +172,10 @@ Graph.prototype.connectNodes = function(nd1, nd2, arrowDir) {
     else if (this.adjMat[nd2.nodeNum][nd1.nodeNum] >= 0)  {
         // make connection in other direction
         edgeID = this.adjMat[nd2.nodeNum][nd1.nodeNum];
-        this.aadjMat[nd2.nodeNum][nd1.nodeNum] = edgeID;
+        this.adjMat[nd2.nodeNum][nd1.nodeNum] = edgeID;
         this.allEdges[edgeID].arrowDir = ARROW_TYPE_BIDIR;
+        nd1.outDeg++;
+        nd2.inDeg++;
     }
     else { // create new edge
         edgeNum = this.nextEdgeNum;
@@ -150,8 +190,14 @@ Graph.prototype.connectNodes = function(nd1, nd2, arrowDir) {
         else if(this.allEdges.length == edgeNum)
             this.allEdges.push(null);
 
+        nd1.outDeg++;
+        nd2.inDeg++;
         this.allEdges[edgeNum] = edge;
         this.adjMat[nd1.nodeNum][nd2.nodeNum] = edgeNum;
+        if(arrowDir != ARROW_TYPE_DST) {
+            // connect bidirectional 
+            this.adjMat[nd2.nodeNum][nd1.nodeNum] = edgeNum;
+        }
     }
 }
 
@@ -212,7 +258,7 @@ Graph.prototype.handleAddNode = function(mousePos, labelMode, quickLabel, rad, c
     }
     this.allNodes[nodeNum] = node;
     
-    console.log("adjMat (pre)= ", this.aadjMat);
+    //console.log("adjMat (pre)= ", this.adjMat);
     // add new row
     this.adjMat.push([]);
     // populate new row
@@ -223,7 +269,7 @@ Graph.prototype.handleAddNode = function(mousePos, labelMode, quickLabel, rad, c
     for (var i=0; i<this.nextNodeNum; i++) {
         this.adjMat[i].push(-1);
     }
-    console.log("adjMat (post)= ", this.adjMat);
+    // console.log("adjMat (post)= ", this.adjMat);
 
     // handle labelling
     if(labelMode == LABEL_MODE_QUICK) {
@@ -232,6 +278,8 @@ Graph.prototype.handleAddNode = function(mousePos, labelMode, quickLabel, rad, c
     else if (labelMode == LABEL_MODE_CUSTOM) {
         document.getElementById("label_wgt_form").style.display = "block";            
     }
+
+    return node;
 }
 
 Graph.prototype.handleNodeMove = function(mousePos) {
@@ -345,10 +393,10 @@ Graph.prototype.makeSortedNodeDistList = function(node) {
 }
 
 // generate random modes based on a expanding ring
-Graph.prototype.makeRandomNodesRing = function(numNodes, rad, quickLabelMode) {
+Graph.prototype.makeRandomNodesRing = function(numNodes, rad, quickLabelMode, canvasWidth, canvasHeight) {
     var ringRad = rad*4;
-    var ctrX = CANVAS_WIDTH / 2;
-    var ctrY = CANVAS_HEIGHT / 2;
+    var ctrX = canvasWidth / 2;
+    var ctrY = canvasHeight / 2;
     var maxPtsPerRing = 6;
     var ptsPerRing = Math.ceil(maxPtsPerRing*0.6 + 0.4*maxPtsPerRing * Math.random());
     var ringPt = 0;
@@ -389,10 +437,10 @@ Graph.prototype.makeRandomNodesRing = function(numNodes, rad, quickLabelMode) {
 }
 
 // generate random modes based on a grid strategy
-Graph.prototype.makeRandomNodesGrid = function(numNodes, rad, quickLabelMode) {
+Graph.prototype.makeRandomNodesGrid = function(numNodes, rad, quickLabelMode, canvasWidth, canvasHeight) {
     var gridDist = rad*4;
-    var numGridX = Math.floor(CANVAS_WIDTH / gridDist);
-    var numGridY = Math.floor(CANVAS_HEIGHT / gridDist);
+    var numGridX = Math.floor(canvasWidth / gridDist);
+    var numGridY = Math.floor(canvasHeight / gridDist);
     var numGridPts = numGridX*numGridY;
     var gridPts = [];
     var i, j;
@@ -428,6 +476,117 @@ Graph.prototype.makeRandomNodesGrid = function(numNodes, rad, quickLabelMode) {
     }
 }
 
+Graph.prototype.makeRandomNodesTree = function(numNodes, rad, quickLabelMode,  numChildrenMin, numChildrenMax, canvasWidth, canvasHeight) {
+    var numChildrenRng =  numChildrenMax - numChildrenMin;
+    var ctrRoot = { x : canvasWidth/2, y : 2*rad };
+    var rootNode = new Node(ctrRoot, rad, 0);
+    rootNode.lvl = 0;
+    makeNodeQuickLabel(quickLabelMode, rootNode);
+    this.allNodes.push(rootNode)
+
+    var nodeQ = new Queue();
+    nodeQ.push(rootNode);
+    numNodes--;
+    var nodesNxtLvl = [];
+    var nodesCurLvl = [rootNode];
+    var lvlCur = 0;
+    this.nextNodeNum = 1;
+    // var maxLvl = Math.ceil(Math.pow(Math.log(numNodes)/Math.log(numChildrenMax), 2));
+    // console.log("maxLvl = ", maxLvl);
+    var pickRandom = false;
+
+    while(numNodes > 0) {      
+        var node;
+        /*  
+        if(nodeQ.empty()) {  // pick random node from current level, with no chidlren
+            idx = Math.floor(nodesCurLvl.length * Math.random());
+            node = nodesCurLvl[idx];
+            console.log("makeRandomNodesTree: nodeQ isEmpty node = ", maxLvl);
+            while(node.numChildren != 0) {
+                idx = Math.floor(nodesCurLvl.length  * Math.random());
+                node = nodesCurLvl[idx];
+            }
+        }
+        else {
+            */
+            if(nodeQ.empty()) break;
+            node = nodeQ.pop();
+            
+        // }
+        
+        // set x position of previous nodes
+        if(node.lvl != lvlCur) {
+            console.log("makeRandomNodesTree: setting x positions nodesNxtLvl.length= " + nodesNxtLvl.length + " x1= ");
+            var dx = canvasWidth/nodesNxtLvl.length;
+            var j = 0;
+            var s = "";
+            nodesNxtLvl.forEach(nd => {
+                var x1 = j * dx + (dx / 2);
+                s += x1 + " ";
+                nd.ctr.x = x1;
+                j++;
+            });
+            console.log(s);
+            lvlCur = node.lvl;
+            // number of nodes expected at this level
+            var numNodesExpected = (numChildrenMin + numChildrenRng/2) * nodesCurLvl.length;
+            var numNodesExpected_nxtLvl = (numChildrenMin + numChildrenRng/2) * numNodesExpected;
+            console.log("makeRandomNodesTree: numNodesExpected= ", numNodesExpected_nxtLvl, " numNodes= ", numNodes);
+            if(numNodes < numNodesExpected_nxtLvl) {
+                pickRandom = true;
+            }
+
+            nodesCurLvl = [... nodesNxtLvl];  // copy nodes
+            nodesNxtLvl = [];
+        }
+
+        if(pickRandom) {
+            nodeQ.push(node);
+            node = nodeQ.removeRandom();
+        }
+
+        // adjust random number by raising to negative power to favor more children higher in tree
+        var rnd_adj = 1; // lvl - maxLvl/2;
+        if(lvlCur == 0) rnd_adj = 1/3;
+        if(lvlCur == 1) rnd_adj = 1/2;
+        // else if(lvlCur == 2) rnd_adj = 1/2;
+
+        var numC = numChildrenMin + Math.round(numChildrenRng * Math.pow(Math.random(), rnd_adj));
+        if(this.nextNodeNum == 1) { // root must have at least two children
+            numC = Math.max(numC, 2); 
+        }
+        numC = Math.min(numNodes, numC);
+        console.log("makeRandomNodesTree: node= ", node, " numC= ", numC);
+        node.numChildren = numC;
+
+        for(var j=0; j<numC; j++) {
+            var lvl = node.lvl + 1;
+            var ctr = { x : canvasWidth/2, y : 0 };
+            ctr.y = 3 * lvl * rad + 2*rad;
+            var childNode = new Node(ctr, rad, this.nextNodeNum);
+            childNode.lvl = lvl;
+            makeNodeQuickLabel(quickLabelMode, childNode);
+            this.allNodes.push(childNode)
+            nodeQ.push(childNode);
+            nodesNxtLvl.push(childNode);
+            this.connectNodes(node, childNode, ARROW_TYPE_DST);
+            numNodes--;
+            this.nextNodeNum++;
+            
+        }
+    }
+
+    var dx = canvasWidth/nodesNxtLvl.length;
+    var j = 0;
+    nodesNxtLvl.forEach(nd => {
+        var x1 = j * dx + (dx / 2);
+        nd.ctr.x = x1;
+        j++;
+    });
+
+    this.allEdges.forEach(e => { if(e != null) e.updatePoints(this.allNodes); });
+}
+
 Graph.prototype.generateRandomGraph = function(canvas) {
     var el = document.getElementById('arrowDir');
     var arrowDir = el.selectedIndex;
@@ -437,11 +596,15 @@ Graph.prototype.generateRandomGraph = function(canvas) {
     }
     var el = document.getElementById('rnd_strategy');
     var strategy = el.selectedIndex;
-    var useEdgeWgt = document.getElementById('rnd_use_edge_wgt').checked;
     var numNodes = parseInt(document.getElementById("rnd_num_nodes").value);
-    var numEdgeMin = parseInt(document.getElementById("rnd_edge_min").value);
-    var numEdgeMax = parseInt(document.getElementById("rnd_edge_max").value);
-    var numEdgeRng = numEdgeMax - numEdgeMin;
+
+    var outDegMin = parseInt(document.getElementById("rnd_outdeg_min").value);
+    var outDegMax = parseInt(document.getElementById("rnd_outdeg_max").value);
+    var outDegRng = outDegMax - outDegMin;
+    var inDegMin = parseInt(document.getElementById("rnd_indeg_min").value);
+    var inDegMax = parseInt(document.getElementById("rnd_indeg_max").value);
+    var inDegRng = inDegMax - inDegMin;
+
     var edgeWeightMin = parseInt(document.getElementById("rnd_edge_wgt_min").value);
     var edgeWeightMax = parseInt(document.getElementById("rnd_edge_wgt_max").value);
     var edgeWeightRng = edgeWeightMax - edgeWeightMin;
@@ -457,11 +620,18 @@ Graph.prototype.generateRandomGraph = function(canvas) {
         }
         this.adjMat.push(eList);
     }
-
+    canvasWidth = canvas.width;
+    canvasHeight = canvas.height;
     if(strategy == STRATEGY_RING) {
-        this.makeRandomNodesRing(numNodes, rad, quickLabelMode);
+        this.makeRandomNodesRing(numNodes, rad, quickLabelMode, canvasWidth, canvasHeight);
+    } else if(strategy == STRATEGY_GRID) {
+        this.makeRandomNodesGrid(numNodes, rad, quickLabelMode, canvasWidth, canvasHeight);
+    } else if(strategy == STRATEGY_TREE) {
+        this.makeRandomNodesTree(numNodes, rad, quickLabelMode, outDegMin, outDegMax, canvasWidth, canvasHeight);
+        return;
     } else {
-        this.makeRandomNodesGrid(numNodes, rad, quickLabelMode);
+        // bad strategy
+        return;
     }
     
     this.nextNodeNum = numNodes;
@@ -473,7 +643,8 @@ Graph.prototype.generateRandomGraph = function(canvas) {
     for(var nd1=0; nd1 < numNodes; nd1++) {
         var nodeList = this.makeSortedNodeDistList(this.allNodes[nd1]);
         //console.log('generateRandomGraph nodeList= ', nodeList);
-        var numEdges = numEdgeMin + Math.floor(Math.random()*numEdgeRng);
+        var numEdgesOut = outDegMin + Math.floor(Math.random()*outDegRng);
+        var numEdgesIn = inDegMin + Math.floor(Math.random()*inDegRng);
         var eList = this.adjMat[nd1];
         //console.log('generateRandomGraph eList= ', eList);
         eList.forEach(e => { 
@@ -481,7 +652,7 @@ Graph.prototype.generateRandomGraph = function(canvas) {
         });
         var j = 0;
         // console.log('generateRandomGraph numEdges= ', eList);
-        while(numEdges > 0 && j < numNodes) {
+        while(numEdgesOut > 0 && j < numNodes) {
             // pick closest node
             //console.log('j= ', j);
             nd2 = nodeList[j].ndNum
@@ -503,7 +674,7 @@ Graph.prototype.generateRandomGraph = function(canvas) {
                     this.adjMat[nd2][nd1] = this.nextEdgeNum;
                 }
                 this.nextEdgeNum++;
-                numEdges--;
+                numEdgesOut--;
             }
             j++;
         }
