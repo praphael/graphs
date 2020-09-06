@@ -81,11 +81,19 @@ function Graph() {
     this.objSel = null;
     this.labelObj = null;
     this.adjMat = [];
+    this.imageURL = "";
+    this.enableImgOverlay = false;
+    this.overlayImg = null;
 }
 
 Graph.prototype.redraw = function(canvas) {
     var ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if(this.enableImgOverlay && this.overlayImg !== null) {
+        ctx.drawImage(this.overlayImg, 0, 0);
+    }
+
     this.allNodes.forEach(node => { 
         /* console.log(obj); */ 
         if(node != null) {
@@ -99,6 +107,12 @@ Graph.prototype.redraw = function(canvas) {
             edge.draw(ctx); 
         }
     });
+}
+
+Graph.prototype.setImageURL = function(url) {
+    this.imageURL = url;    
+    this.overlayImg = new Image();
+    this.overlayImg.src = url;
 }
 
 Graph.prototype.HitTestAllObjs = function(mousePos)  {
@@ -702,8 +716,8 @@ Graph.prototype.loadGraph = function(gr) {
     for(var i=0; i<this.allEdges.length; i++) {
         var e = new Edge()
         Object.assign(e, gr.allEdges[i]);
-        this.allEdges[i] = e;
         e.updatePoints(this.allNodes);
+        this.allEdges[i] = e;
     }    
 }
 

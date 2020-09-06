@@ -118,10 +118,18 @@
         width: 150px;
         height: 200px;
       }
+      div.imageOverlay {
+        position: absolute;
+        top: 500px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+
+      }
 
       div.clearButton {
         position: absolute;
-        top: 500px;
+        top: 600px;
         left: 0px;
         width: 100px;
         height: 100px;
@@ -301,7 +309,11 @@
           </select><br/>
           <input type="color" id="node_color" name="node_color" size=1 value="#FFECA6">
         </div>
-
+        <div class="imageOverlay">
+          <label for="img_overlay">Image overlay URL</label><br/>
+          <input type="text" id="img_overlay" size=15><br/>
+          <input type="checkbox" id="img_overlay_check" checked=True><label for="img_overlay_check">Enable:</label>
+        </div>
         <div class="clearButton">
             <button id="clear" width=150>Clear</button>
           </div>      
@@ -636,7 +648,7 @@
       }, false);
 
       document.getElementById('clear').onclick = function () { graph.clearNodes(canvas); }
-      document.getElementById('label_wgt_popup_ok').onclick= function () { graph.labelWeightPopupClick(); }
+      document.getElementById('label_wgt_popup_ok').onclick= function () { labelWeightPopupClick(); }
       // document.getElementById('rnd_use_edge_wgt').onclick= function () { rndGraphEdgeWeightClick(); }
       document.getElementById('generate_random').onclick = function () { graph.generateRandomGraph(canvas); }
 
@@ -715,6 +727,13 @@
           });
           fRead.readAsText(file);
         } 
+
+        document.getElementById('img_overlay_check').onclick = function() {
+          var url = document.getElementById('img_overlay').value;
+          if(url != graph.imageURL)
+            graph.setImageURL(url);
+          graph.enableImgOverlay = document.getElementById('img_overlay_check').checked;
+        }
 
 
         var color = document.getElementById('node_color').value;
