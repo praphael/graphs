@@ -3,7 +3,7 @@
 const EDGE_COLOR = "#000000";
 const EDGE_SELECT_COLOR = "#A0A000";
 
-function Edge(nd1, nd2, edgeNum, allNodes, arrowDir=ARROW_TYPE_NONE) {
+function Edge(nd1, nd2, edgeNum, allNodes=null, arrowDir=ARROW_TYPE_NONE) {
     this.pt1 = { x : 0, y : 0 };
     this.pt2 = { x : 0, y : 0 };
     this.isSel = false;
@@ -12,7 +12,8 @@ function Edge(nd1, nd2, edgeNum, allNodes, arrowDir=ARROW_TYPE_NONE) {
     this.nodes = [nd1, nd2];
     this.weight = [0, 0];
     this.color = EDGE_COLOR;
-    this.updatePoints(allNodes);
+    if(allNodes != null)
+        this.updatePoints(allNodes);
 }
 
 Edge.prototype.draw = function (ctx, showWeights=false) {

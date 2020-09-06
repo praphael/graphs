@@ -23,12 +23,24 @@
         top: 10px;
         left: 10px;
         width: 800px;
-        height: 100px;
+        height: 50px;
+      }
+
+      div.header {
+        position: absolute;
+        margin: auto;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        top: 10px;
+        left: 10px;
+        width: 800px;
+        height: 50px;
       }
 
       div.controls {
         position: absolute;
-        top: 125px;
+        top: 50px;
         left: 10px;
         width: 200px;
         height: 600px;
@@ -36,7 +48,7 @@
 
       canvas {
         position: absolute;
-        top: 125px;
+        top: 50px;
         left: 175px;
         border: 2px solid #000000; 
       }
@@ -136,6 +148,16 @@
         height: 40px;
       }
 
+      #load_graph {
+        width: 120px;
+        height: 40px;
+      }
+
+      #save_graph {
+        width: 120px;
+        height: 40px;
+      }
+
       div.label_wgt_popup {
         display: none;
         position: fixed;
@@ -147,13 +169,13 @@
 
       div.tools {
         position: absolute;
-        top: 100px;
+        top: 25px;
         left: 1000px;
       }
 
       #alg_results {
         position: absolute;
-        top: 750px;
+        top: 675px;
         left: 200px;
         width: 700px;
         height: 150px;
@@ -173,7 +195,7 @@
       #alg_log {
         /* position: absolute; */
         width: 300px;
-        height: 300px;
+        height: 150px;
         /*
         top: 500px;
         left: 1000px;
@@ -197,13 +219,17 @@
       </fieldset>
     </div>
 
+    <div class="header"> 
+      Fun With Graphs
+    </div>
+    <!--
     <div class="instructions"> 
         Instructions:<br/>
-        Click anywhere in the box to add a new mode, while in 'Place' mode<br/>
+        Click anywhere in the box to add a new mode, while in 'Place' mode.
         To join nodes, in 'Place' mode, click on one and then another. Arrow type will depend on option selected in 'Arrow'<br/>
-        Right click to delete a node or edge<br>
-        To edit a node properties, such as radius, click on node in 'Edit' mode 
+        Right click to delete a node or edge. To edit a node properties, such as radius, click on node in 'Edit' mode 
     </div>
+    -->
     <div class="controls"> 
         <div class="options1">
             <label for="nodeRadius">Node radius:</label>
@@ -292,7 +318,7 @@
         <option value="Two">Two arrows</option>
       </select><br/>
     -->
-      <p><h3>Random Graph:</h3></p>
+      <h3>Random Graph:</h3>
       Stategy:
       <select id="rnd_strategy">
         <option value="Grid" selected>Grid</option>
@@ -301,6 +327,11 @@
       </select>
       <label for="rnd_num_nodes">Nodes:</label>
       <input type="text" name="rnd_num_nodes" id="rnd_num_nodes" value="20" class="text" size=2><br/>
+      <label for="rnd_node_wgt_min">Weight Min:</label>
+      <input type="text" name="rnd_node_wgt_min" id="rnd_node_wgt_min" value="1" class="text" size=2 disabled>
+      <label for="rnd_node_wgt_max">Max:</label>
+      <input type="text" name="rnd_node_wgt_max" id="rnd_node_wgt_max" value="10" class="text" size=2 disabled><br/>
+      <br/>
       <b>Edges</b><br/>
       <label for="rnd_outdeg_min">Out Min:</label>
       <input type="text" name="rnd_outdeg_min" id="rnd_outdeg_min" value="0" class="text" size=2>
@@ -317,12 +348,12 @@
       <label for="rnd_edge_wgt_max">Max:</label>
       <input type="text" name="rnd_edge_wgt_max" id="rnd_edge_wgt_max" value="10" class="text" size=2 disabled><br/>
       <br/>
-      <label for="rnd_vertex_wgt_min">Vertex Weight Min:</label>
-      <input type="text" name="rnd_vertex_wgt_min" id="rnd_vertex_wgt_min" value="1" class="text" size=2 disabled>
-      <label for="rnd_edge_wgt_max">Max:</label>
-      <input type="text" name="rnd_edge_wgt_max" id="rnd_edge_wgt_max" value="10" class="text" size=2 disabled><br/>
-      <br/>
       <button id="generate_random" width=150 height=50>Generate</button><br/>
+
+      <p><h3>Load/Save</h3></p>
+      <input type="file" id="graph_filename"><br/>
+      <button id="save_graph">Save</button>
+      <button id="load_graph">Load</button></br>
 
       <p><h3>Algorithm:</h3></p>
       <select id="algorithm">
@@ -368,6 +399,7 @@
     <canvas id="myCanvas" width=800 height=600></canvas>
 
     
+    <!--
     <script type="text/javascript"
         src="node.js" >
     </script>
@@ -380,7 +412,18 @@
     <script type="text/javascript"
         src="algorithms_1.js" >
     </script>
+    <script type="text/javascript"
+          src="FileSaver.js" >
+    </script>
+    -->
     
+    <script src="node.js"></script>
+    <script src="edge.js"></script>
+    <script src="graphs.js"></script>
+    <script src="algorithms_1.js"></script>
+    <script src="FileSaver.js"></script>
+
+
     <script>
        const CANVAS_WIDTH = 800;
        const CANVAS_HEIGHT = 600;
@@ -653,6 +696,26 @@
           });
           graph.redraw(canvas); 
         }
+
+        document.getElementById('save_graph').onclick = function () { 
+          var str = JSON.stringify(graph);
+          var blob = new Blob([str], {type: "text/plain;charset=utf-8"});
+          saveAs(blob, "graph.json");
+        }
+
+        document.getElementById('load_graph').onclick = function () { 
+          var file = document.getElementById('graph_filename').files[0];
+          var fRead = new FileReader();
+          fRead.addEventListener('loadend', function() {
+            document.getElementById('alg_log').innerText = fRead.result;
+            var gr = JSON.parse(fRead.result);
+            
+            graph.loadGraph(gr);
+            graph.redraw(canvas);
+          });
+          fRead.readAsText(file);
+        } 
+
 
         var color = document.getElementById('node_color').value;
         // add some default nodes

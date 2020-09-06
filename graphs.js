@@ -690,5 +690,22 @@ Graph.prototype.transpose = function(edge) {
     this.adjMat[nd2][nd1] = tmp;
 }
 
+Graph.prototype.loadGraph = function(gr) {
+    Object.assign(this, gr);
+
+    for(var i=0; i<this.allNodes.length; i++) {
+        var nd = new Node();
+        Object.assign(nd, gr.allNodes[i]);
+        this.allNodes[i] = nd;
+    }
+
+    for(var i=0; i<this.allEdges.length; i++) {
+        var e = new Edge()
+        Object.assign(e, gr.allEdges[i]);
+        this.allEdges[i] = e;
+        e.updatePoints(this.allNodes);
+    }    
+}
+
 
     
