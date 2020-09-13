@@ -10,6 +10,11 @@ const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
     return hex.length === 1 ? '0' + hex : hex
 }).join('');
 
+const numToHex = (num) => {
+    const hex = num.toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+}
+
 const hexToRgb = hex =>
     hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b).substring(1).match(/.{2}/g).map(x => parseInt(x, 16));
 
@@ -91,8 +96,9 @@ function Node(ctr, radius, nodeNum) {
     this.isSel = false;
     this.label = null;
     this.weight = 0;
-    this.color = "#F0F0FF";
-    this.origcolor = "#F0F0FF";
+    this.color = "#F0F0FFFF";
+    this.opacity = 255;
+    this.origcolor = "#F0F0FFFF";
     this.inDeg = 0;
     this.outDeg = 0;
 }
@@ -119,7 +125,8 @@ Node.prototype.draw = function(ctx) {
         ctx.strokeStyle = NODE_SELECT_OUTLINE_COLOR;
     }
     else {
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = this.color;//  + numToHex(this.opacity);
+        ctx.globalAlpha = this.opacity/100.0;
         ctx.strokeStyle = NODE_OUTLINE_COLOR;
     }
 
@@ -131,6 +138,8 @@ Node.prototype.draw = function(ctx) {
     
     ctx.stroke();
     
+    ctx.globalAlpha = 1.0;
+
     if(this.label != null) {
         // invert colors for text when selected
         ctx.fillStyle = NODE_OUTLINE_COLOR;

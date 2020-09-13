@@ -118,18 +118,26 @@
         width: 150px;
         height: 200px;
       }
+
+      div.nodeOpacity {
+        position: absolute;
+        top: 450px;
+        left: 0px;
+        width: 150px;
+        height: 200px;
+      }
+
       div.imageOverlay {
         position: absolute;
         top: 500px;
         left: 0px;
         width: 150px;
         height: 200px;
-
       }
 
       div.clearButton {
         position: absolute;
-        top: 600px;
+        top: 650px;
         left: 0px;
         width: 100px;
         height: 100px;
@@ -304,15 +312,21 @@
             <input type="checkbox" id="show_node_weights" name="showNodeWeights" value="show_node_weights">Node Weights</input>
         </div>
         <div class="nodeColor">
-          Node color:<br/>
+          <b>Node color:</b><br/>
           <select id="node_color_select">            
           </select><br/>
           <input type="color" id="node_color" name="node_color" size=1 value="#FFECA6">
         </div>
+        <div class="nodeOpacity">
+          Opacity<br/>
+          <input type="range"  id="node_opacity" min="1" max="100" value="100">
+        </div>
         <div class="imageOverlay">
           <label for="img_overlay">Image overlay URL</label><br/>
           <input type="text" id="img_overlay" size=15><br/>
-          <input type="checkbox" id="img_overlay_check" checked=True><label for="img_overlay_check">Enable:</label>
+          <input type="checkbox" id="img_overlay_enable_check" checked=True><label for="img_overlay_enable_check">Enable:</label><br/>
+          <input type="checkbox" id="img_overlay_shrink_check" checked=True><label for="img_overlay_shrink_check">Shrink To Fit:</label><br/>
+          <input type="checkbox" id="img_overlay_aspect_check" checked=True><label for="img_overlay_aspect_check">Maintain Aspect Ratio:</label><br/>
         </div>
         <div class="clearButton">
             <button id="clear" width=150>Clear</button>
@@ -523,6 +537,7 @@
           var wgt = parseInt(document.getElementById("ne_weight").value);
           var rad = parseInt(document.getElementById("ne_radius").value);
           console.log('labelWeightPopupClick label= ', label, ' wgt=', wgt);
+          // hide the form
           document.getElementById("label_wgt_form").style.display = "none";            
           labelObj.label = label;
           labelObj.weight = wgt;
@@ -540,6 +555,48 @@
           document.getElementById('rnd_edge_wgt_max').disabled = !isChecked;
       }
 
+      function generateRandomGraph() {
+        var el = document.getElementById('arrowDir');
+        var opts = new Object();
+
+        opts.arrowDir = el.selectedIndex;
+        opts.quickLabelMode = QUICK_LABEL_NUMBER;
+        if(document.getElementById('lbl_char').checked) {
+          opts.quickLabelMode = QUICK_LABEL_CHAR;
+        }
+        var el = document.getElementById('rnd_strategy');
+        opts.strategy = el.selectedIndex;
+        opts.numNodes = parseInt(document.getElementById("rnd_num_nodes").value);
+
+        opts.outDegMin = parseInt(document.getElementById("rnd_outdeg_min").value);
+        opts.outDegMax = parseInt(document.getElementById("rnd_outdeg_max").value);
+        opts.outDegRng = opts.outDegMax - opts.outDegMin;
+        opts.inDegMin = parseInt(document.getElementById("rnd_indeg_min").value);
+        opts.inDegMax = parseInt(document.getElementById("rnd_indeg_max").value);
+        opts.inDegRng = opts.inDegMax - opts.inDegMin;
+
+        opts.edgeWeightMin = parseInt(document.getElementById("rnd_edge_wgt_min").value);
+        opts.edgeWeightMax = parseInt(document.getElementById("rnd_edge_wgt_max").value);
+        opts.edgeWeightRng = opts.edgeWeightMax - opts.edgeWeightMin;
+        opts.rad = parseInt(document.getElementById('nodeRadius').value);
+
+        el = document.getElementById('node_color');
+        opts.nodeColor = el.value;
+        el = document.getElementById('node_opacity');
+        opts.nodeOpacity = el.value;
+
+        graph.generateRandomGraph(canvas, opts); 
+      }
+
+
+      function setOverlayImageOpts() {
+        var url = document.getElementById('img_overlay').value;
+        if(url != graph.imageURL)
+          graph.setImageURL(url);
+        graph.enableImgOverlay = document.getElementById('img_overlay_enable_check').checked;
+        graph.imgOverlayShrinkToFit = document.getElementById('img_overlay_shrink_check').checked;
+        graph.imgOverlayMaintainAspect = document.getElementById('img_overlay_aspect_check').checked;
+      }
 
       canvas.addEventListener('mousemove', function(evt) {
         var mousePos = getMousePos(canvas, evt);
@@ -585,6 +642,8 @@
         console.log("HitTestAllObjs returned obj=", obj);
         el = document.getElementById('node_color');
         var color = el.value;
+        el = document.getElementById('node_opacity');
+        var opacity = el.value;
 
         if(editMode == MODE_PLACE) {
             if(obj != null) {
@@ -592,8 +651,12 @@
                 graph.handleObjClicked(obj, arrowDir);
             }
             else {
-                graph.handleAddNode(mousePos, labelMode, quickLabelMode, rad, color);
-            }
+                graph.handleAddNode(mousePos, labelMode, quickLabelMode, rad, color, opacity);
+                if (labelMode == LABEL_MODE_CUSTOM) {
+                    // show the label/weight popup form
+                    document.getElementById("label_wgt_form").style.display = "block";
+                }
+            }            
         } 
         else if(editMode == MODE_MOVE) {
             if(obj != null) {
@@ -650,7 +713,9 @@
       document.getElementById('clear').onclick = function () { graph.clearNodes(canvas); }
       document.getElementById('label_wgt_popup_ok').onclick= function () { labelWeightPopupClick(); }
       // document.getElementById('rnd_use_edge_wgt').onclick= function () { rndGraphEdgeWeightClick(); }
-      document.getElementById('generate_random').onclick = function () { graph.generateRandomGraph(canvas); }
+      document.getElementById('generate_random').onclick = function () { 
+         generateRandomGraph(); 
+      }
 
       // populate colors seleector 
       var el = document.getElementById('node_color_select');
@@ -728,11 +793,16 @@
           fRead.readAsText(file);
         } 
 
-        document.getElementById('img_overlay_check').onclick = function() {
-          var url = document.getElementById('img_overlay').value;
-          if(url != graph.imageURL)
-            graph.setImageURL(url);
-          graph.enableImgOverlay = document.getElementById('img_overlay_check').checked;
+        document.getElementById('img_overlay_enable_check').onclick = function() {
+          setOverlayImageOpts();
+        }
+
+        document.getElementById('img_overlay_shrink_check').onclick = function() {
+          setOverlayImageOpts();
+        }
+
+        document.getElementById('img_overlay_aspect_check').onclick = function() {
+          setOverlayImageOpts();
         }
 
 
@@ -764,6 +834,10 @@
         graph.connectNodes(nd4, nd5, ARROW_TYPE_DST);
         graph.connectNodes(nd3, nd5, ARROW_TYPE_DST);
         graph.connectNodes(nd6, nd5, ARROW_TYPE_DST);
+
+        // document.getElementById('img_overlay').value = 'us_map_topo.jpg';
+        setOverlayImageOpts();
+
         graph.redraw(canvas);
         
     </script>
