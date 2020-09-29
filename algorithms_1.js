@@ -1,7 +1,7 @@
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
+}
 
 function TransposeAlg() {
     this.description = "Graph transpose.\nA simple graph algorithm which mnerely swaps the direction of all edges.\n " +
@@ -13,7 +13,7 @@ TransposeAlg.prototype.run = function(graph, show, canvas, logText, resultsText)
     logText.innerText = "";
 
     var sLog = "";
-    var sleepTime = 0;
+    var sleepTime;
     var sleepTimeInc= 100;
     var ctx = canvas.getContext("2d");
 
@@ -89,30 +89,47 @@ function DFSAlg() {
         "Ah analogy would be single person going for a walk, then retracing their steps when they get to a dead end.\n" +
         "This is a basic stragey is used in many graph algorithms\n" +
         "If no node is selected, it will run with the first node.";
+    this.discFn = null;  // custom function to execute when DFS discovers a given node
+    this.finishFn = null;  // custom function to execute when DFS finishes a given node
+    this.nodesVisited = null;
 }
 
 
 
-DFSAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
-    var nodesVisited = [];
-    var ctx;
+DFSAlg.prototype.run = function(graph, show, canvas, logText, resultsText, initAlg=true) {
+    var nodesVisited;
+    var discOrder;
+    var finishOrder;
+    var discFn = this.discFn;
+    var finishFn = this.finishFn;
+
     var s = "";
-    var s2 = "";
-    var nodeOrder = [];
+    var rTxt;
+    var ctx = canvas.getContext("2d");
     var sleepTime = 0;
     var sleepTimeInc = 200;
 
     function updateNode(nodeHnd) {
-        nodeHnd.origcolor = nodeHnd.color;
         nodeHnd.color = "#FA0000"; // color node red
         nodeHnd.draw(ctx);
-    
-        s2 = s2 + " -> " + nodeHnd.label;
-        resultsText.innerText = s2; 
+        rTxt = rTxt + " -> " + nodeHnd.label;
+
+        resultsText.innerText = rTxt; 
     }
 
     function DFS(node, recLevel) {
+        if(node < 0)
+            return;
+
+        // we have already visited this node
+        if(nodesVisited[node])
+            return;
+
+        nodesVisited[node] = true;
+
         var nd = graph.allNodes[node];
+        if (nd == null) 
+            return;
         
         var edgeList = graph.adjMat[node];
         if(show) {
@@ -127,7 +144,10 @@ DFSAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
             updateNode(nd);
         }
         
-        nodeOrder.push(nd);
+        discOrder.push(node);
+        // execute custom discovery function
+        if(discFn != null)
+            discFn();
 
         edgeList.forEach(edgeID => {
             s = s + " eID= " + edgeID;
@@ -147,44 +167,44 @@ DFSAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
                     s = s + " nextNode(ID)= " + nextNode;
                     logText.innerText = s;
 
-                    if(nextNode >= 0) {
-                        if(!nodesVisited[nextNode]) {
-                            if(show) {
-                                sleepTime += sleepTimeInc;
-                                var sTime = sleepTime;
-                                sleep(sTime).then(() => {
-                                    nd.isSel = false;
-                                    e.isSel = true;
-                                    e.draw(ctx);
-                                    nd.draw(ctx);
-                                });
-                            }
-                            // s2 = s2 + " ->" + nextNode;
-                            //resultsText.innerText = s2; 
-
-                            // recursively call DFS
-                            nodesVisited[nextNode] = true;
-                            DFS(nextNode, recLevel + 1);
-                            if(show) {
-                                sleepTime += sleepTimeInc;
-                                var sTime = sleepTime;
-                                sleep(sTime).then(() => {
-                                    nd.isSel = true;
-                                    e.isSel = false;
-                                    /* 
-                                    e.draw(ctx);
-                                    nd.draw(ctx);
-                                    */
-                                    graph.redraw(canvas);
-                                });
-                            }
-                            
+                    if(nextNode >= 0 && !nodesVisited[nextNode]) {
+                        if(show) {
+                            sleepTime += sleepTimeInc;
+                            var sTime = sleepTime;
+                            sleep(sTime).then(() => {
+                                nd.isSel = false;
+                                e.isSel = true;
+                                e.draw(ctx);
+                                nd.draw(ctx);
+                            });
                         }
-                        
+                        // s2 = s2 + " ->" + nextNode;
+                        //resultsText.innerText = s2; 
+
+                        // recursively call DFS
+                        DFS(nextNode, recLevel + 1);
+                        if(show) {
+                            sleepTime += sleepTimeInc;
+                            var sTime = sleepTime;
+                            sleep(sTime).then(() => {
+                                nd.isSel = true;
+                                e.isSel = false;
+                                /* 
+                                e.draw(ctx);
+                                nd.draw(ctx);
+                                */
+                                graph.redraw(canvas);
+                            });
+                        }
                     }
                 }
             }
         });
+
+        finishOrder.push(node);
+        // execute custom discovery function
+        if(finishFn != null)
+            finishFn();
 
         if(show) {
             sleepTime += sleepTimeInc;
@@ -194,24 +214,41 @@ DFSAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
                 nd.draw(ctx);
             });
         }
-        
     }
 
-    logText.innerText = "";
+    
+
     var ndNum = 0;
     var objSel = graph.objSel;
     if(objSel != null) {
         if(objSel.objType() == NODE)
             ndNum = objSel.nodeNum;
     }
-    nodesVisited = [];
+    if(initAlg) {
+        sleepTime = 0;
+        discOrder = [];
+        finishOrder = [];
+        nodesVisited = new Array(graph.allNodes.length).fill(false);
+        logText.innerText = "";
+        rTxt = "";
+        this.nodesVisited = nodesVisited;
+        this.discOrder = discOrder;
+        this.finishOrder = finishOrder;
+        this.rTxt = rTxt;
+    } else {
+        discOrder = this.discOrder;
+        finishOrder = this.finishOrder;
+        nodesVisited = this.nodesVisited;
+        sleepTime = this.sleepTime;
+        rTxt = this.rTxt;
+    }
+
+    /*
     for(var i=0; i<graph.allNodes.length; i++)
         nodesVisited.push(false);
-
-    ctx = canvas.getContext("2d");
-    nodesVisited[ndNum] = true;
-    DFS(ndNum, 0);    
-
+    */
+    DFS(ndNum, 0);
+    this.sleepTime = sleepTime;
     /*
     nodeOrder.forEach => ( nd => {
 
@@ -229,7 +266,7 @@ function BFSAlg() {
         "If no node is selected, it will run with the first node.";
 }
 
-BFSAlg.prototype.run = function(graph, show, canvas, logText, resultsText, objSel) {
+BFSAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
 
     var ctx = canvas.getContext('2d');
     var nodesVisited = [];
@@ -237,7 +274,6 @@ BFSAlg.prototype.run = function(graph, show, canvas, logText, resultsText, objSe
     var sRes = "";
 
     function updateNode(nodeHnd) {
-        nodeHnd.origcolor = nodeHnd.color;
         nodeHnd.color = "#FA0000"; // color node red
     
         /*
@@ -400,62 +436,38 @@ function SCCAlg() {
         "for undirected graphs";
 }
 
-SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText, objSel) {
-
-    
+SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
+    var ctx = canvas.getContext("2d");
+    var sleepTime;
+    var sleepTimeInc = 100;
     var N = graph.allNodes.length;
-    var visited = new Array(N);
-    visited.fill(false);
     var comp = new Array(N);
     comp.fill(-1);
+    var transEdges = [];  // transposed edges - stored separately so algoirthm and display can run independently
+    var transMat = [];  // transposed adjacency matrix - stored separately so algoirthm and display can run independently
 
-    // create transpose of orinal graph
-    var adjMatTrns = [];
-    for(var i=0; i<N; i++) {
-        var row = new Array(N);
-        row.fill(-1);
-        adjMatTrns.push(row);
+    function updateNodeColor(sTime, nd, clr) {
+        sleep(sTime).then( () => {
+            console.log("updateNodeColor nd = " + nd.nodeNum + " clr= " + clr);
+            nd.color = clr;
+            nd.draw(ctx);
+        });
     }
-        
 
-    console.log(adjMatTrns);
-    graph.allEdges.forEach(edge => {
-        if(edge != null) {
-            console.log('edge ' + edge.edgeNum + ' nodes=' + edge.nodes);
-            nd1 = edge.nodes[0];
-            nd2 = edge.nodes[1];
-            adjMatTrns[nd2][nd1] = edge.edgeNum;
-            if(edge.arrowDir != ARROW_TYPE_DST) { // bidirectional
-                adjMatTrns[nd1][nd2] = edge.edgeNum;
-            }
-        }
-    });
+    function copyNodeColor(sTime, nd, rt) {
+        sleep(sTime).then( () => {
+            console.log("copyNodeColor nd = " + nd.nodeNum + " rt = " + rt.nodeNum + " rt.color= " + rt.color);
+            nd.color = rt.color;
+            nd.draw(ctx);
+        });
+    }
 
-    console.log('adjMatTrns=');
-    for(var i=0; i<N; i++)
-        console.log(adjMatTrns[i]);
-
-    function DFS(nodeNum, lst) {
-        console.log('SCC.DFS() nodeNum= ' + nodeNum + ' lst= ' + lst);
-        if(nodeNum < 0)
-            return;
-
-        if(!visited[nodeNum]) {
-            visited[nodeNum] = true;
-            adj = graph.adjMat[nodeNum];
-            adj.forEach(edgeNum => {
-                edge = graph.allEdges[edgeNum];
-                if(edge != null) {
-                    nd_adj = edge.nodes[1];
-                    if((edge.arrowDir != ARROW_TYPE_DST) && (nd_adj == nodeNum))
-                        nd_adj = edge.nodes[0];
-                    console.log('nodeNum= ' + nodeNum + ' nd_adj= ' + nd_adj);
-                    DFS(nd_adj, lst);
-                }
-            });
-
-            lst.unshift(nodeNum)
-        }
+    function updateEdge(sTime, edge, isSel) {
+        sleep(sTime).then( () => { 
+            edge.isSel = isSel;
+            graph.transpose(edge);
+            graph.redraw(canvas);
+        });    
     }
 
     function Assign(nodeNum, root) {
@@ -469,18 +481,24 @@ SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText, objSe
 
         if(comp[nodeNum] < 0) {
             comp[nodeNum] = root;
-            nd.color = graph.allNodes[root].color;
+
+            if(show) {
+                sleepTime += sleepTimeInc;
+                copyNodeColor(sleepTime, nd, graph.allNodes[root]);
+            } else {
+                nd.color = graph.allNodes[root].color;
+            }
         } 
         else return;  // we have already assigned component
 
-        eLst = adjMatTrns[nodeNum];
+        eLst = transMat[nodeNum];
         console.log('eLst= ' + eLst);
         eLst.forEach(edgeNum => {
-            edge = graph.allEdges[edgeNum];
+            edge = transEdges[edgeNum];
             if(edge != null) {
-                nd_adj = edge.nodes[0]; // since this is tranpose, the adjacent edge should be the first 
+                nd_adj = edge.nodes[1]; 
                 if((edge.arrowDir != ARROW_TYPE_DST) && (nd_adj == nodeNum))
-                    nd_adj = edge.nodes[1];
+                    nd_adj = edge.nodes[0];
                 // console.log('nodeNum= ' + nodeNum + ' edge.nodes= ' + edge.nodes + ' nd_adj= ' + nd_adj);
 
                 Assign(nd_adj, root);
@@ -488,28 +506,66 @@ SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText, objSe
         });
     }
     
-    // Koseraju's algorithm - first construct a list of nodes by DFS'ing all nodes, prepending each node to list as it is discovered
-    var lst = []
+    var DFS = new DFSAlg();
+
+    // Koseraju's algorithm - first construct a list of nodes by DFS'ing all nodes, saving finish times
+    initAlg = true;
     graph.allNodes.forEach(nd => {
         if (nd != null) {
             var ndNum = nd.nodeNum;
-            console.log('ndNum= ' + ndNum + ' lst= ' + lst);
-            
-            if(!visited[ndNum]) {
-                // depth first search to visit all nodes connected to this node
-                DFS(ndNum, lst);
-            }
+            console.log('ndNum= ' + ndNum + ' finishOrder= ' + DFS.finishOrder);
+            if (graph.objSel != null)
+                graph.objSel.isSel = false;
+
+            // depth first search to visit all nodes connected to this node
+            // DFS(ndNum, lst);
+            graph.objSel = graph.allNodes[ndNum];
+            DFS.run(graph, show, canvas, logText, resultsText, initAlg);
+            graph.objSel = null;
         }
+        initAlg = false;
     });
 
-     var clrNum = 0;
-     // assign SCC based on transpose
-     const hue = [0.0, 0.083, 0.167, 0.319, 0.5, 0.658, 0.764, 0.847];
-     const lgt = [0.5, 0.25, 0.75];
-     const sat = [1.0, 0.75, 0.5, 0.25];
+    sleepTime = DFS.sleepTime;
+
+    var clrNum = 0;
+    // assign SCC based on transpose
+    const hue = [0.0, 0.083, 0.167, 0.319, 0.5, 0.658, 0.764, 0.847];
+    const lgt = [0.5, 0.25, 0.75];
+    const sat = [1.0, 0.75, 0.5, 0.25];
      
-     lst.forEach(ndNum => {
-        
+    finishOrder = DFS.finishOrder;
+    console.log('SCC finishOrder.length= ' + finishOrder.length + " sleepTime= " + sleepTime);
+
+    
+    // transpose graph
+    for(var i = 0; i<N; i++) {
+        row = Array(N).fill(-1);
+        transMat.push(row);
+    }    
+
+    var j = 0;
+    transEdges = Array(graph.allEdges.length).fill(null);
+    graph.allEdges.forEach(edge => {
+        // function Edge(nd1, nd2, edgeNum, allNodes=null, arrowDir=ARROW_TYPE_NONE) {
+        // store transposed edges separate, so algorithm can run properly indepednent of display 
+        if(edge != null) {
+            var e = new Edge(edge.nodes[1], edge.nodes[0], edge.edgeNum, null, edge.arrowDir);
+            transEdges[j] = e;
+            transMat[edge.nodes[1]][edge.nodes[0]] = edge.edgeNum;
+
+            if(show) {
+                sleepTime += sleepTimeInc;
+                updateEdge(sleepTime, edge, true);
+            } else {
+                graph.transpose(edge);
+            }
+        }
+        j++;
+    });
+
+    while(finishOrder.length > 0) {
+        ndNum = finishOrder.pop();
         if(comp[ndNum] < 0) {
             var nd = graph.allNodes[ndNum];
 
@@ -521,16 +577,40 @@ SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText, objSe
             var s = sat[idx];
             var clr = hslToRgb(h, s, l);
             var clr_hx = rgbToHex(... clr);
-            nd.origcolor = nd.color;
+            
             console.log('clr= ' + clr + ' clr_hx= ' + clr_hx);
-            nd.color = clr_hx;
+            if(show) {
+                sleepTime += sleepTimeInc;
+                updateNodeColor(sleepTime, nd, clr_hx);
+            } else {
+                nd.color = clr_hx;
+            }
 
             Assign(ndNum, ndNum);
             
             // increemnt color
             clrNum++;
         }
+    }
+
+    // transpose graph back
+    graph.allEdges.forEach(edge => {
+        if(show) {
+            sleepTime += sleepTimeInc;;
+            updateEdge(sleepTime, edge, false);
+        } else {
+            graph.transpose(edge);
+        }
     });
+
+    if(show) {
+        sleepTime += sleepTimeInc;
+        sleep(sleepTime).then(() => { 
+            graph.redraw(canvas);
+        });
+    } else {
+        graph.redraw(canvas);
+    }
 }
 
 function TopoSortAlg() {

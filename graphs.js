@@ -452,6 +452,7 @@ Graph.prototype.makeRandomNodesRing = function(numNodes, rad, quickLabelMode, ca
         var ctr = { x : x1, y : y1 };
         var node = new Node(ctr, rad, i);
         node.color = nodeColor;
+        node.origColor = nodeColor;
         node.opacity = nodeOpacity;
         makeNodeQuickLabel(quickLabelMode, node);
         this.allNodes.push(node)
@@ -505,6 +506,7 @@ Graph.prototype.makeRandomNodesTree = function(numNodes, rad, quickLabelMode, nu
     var ctrRoot = { x : canvasWidth/2, y : 2*rad };
     var rootNode = new Node(ctrRoot, rad, 0);
     rootNode.color = nodeColor;
+    rootNode.origcolor = nodeColor;
     rootNode.opacity = nodeOpacity;
     rootNode.lvl = 0;
     makeNodeQuickLabel(quickLabelMode, rootNode);
@@ -592,6 +594,7 @@ Graph.prototype.makeRandomNodesTree = function(numNodes, rad, quickLabelMode, nu
             ctr.y = 3 * lvl * rad + 2*rad;
             var childNode = new Node(ctr, rad, this.nextNodeNum);
             childNode.color = nodeColor;
+            childNode.origcolor = nodeColor;
             childNode.opacity = nodeOpacity;
             childNode.lvl = lvl;
             makeNodeQuickLabel(quickLabelMode, childNode);

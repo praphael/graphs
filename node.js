@@ -110,15 +110,15 @@ Node.prototype.objType = function() {
 Node.prototype.draw = function(ctx) {
     if(this.isSel) {
         var clr = hexToRgb(this.color);
-        console.log('clr (pre)= ', clr);
+        // console.log('clr (pre)= ', clr);
         hsl = rgbToHsl(clr[0], clr[1], clr[2]);
-        console.log('hsl= ', hsl);
+        // console.log('hsl= ', hsl);
         if(hsl[2] < 0.5) hsl[2] = 0.8;
         else hsl[2] = 0.2; 
         rgb = hslToRgb(hsl[0], hsl[1], hsl[2]);
-        console.log('rgb= ', rgb);
+        // console.log('rgb= ', rgb);
         clr = rgbToHex(rgb[0], rgb[1], rgb[2]);
-        console.log('clr (post)= ', clr);
+        // console.log('clr (post)= ', clr);
 
         ctx.fillStyle = clr;
 
