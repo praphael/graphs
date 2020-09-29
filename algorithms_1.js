@@ -1,3 +1,4 @@
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -397,6 +398,139 @@ function SCCAlg() {
         "Each node in a given set, must be reachable from all other nodes in the set.\n" + 
         "Generally only makes sense for directed graphs, or bidirectional graphs which are disconnected.\n" +
         "for undirected graphs";
+}
+
+SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText, objSel) {
+
+    
+    var N = graph.allNodes.length;
+    var visited = new Array(N);
+    visited.fill(false);
+    var comp = new Array(N);
+    comp.fill(-1);
+
+    // create transpose of orinal graph
+    var adjMatTrns = [];
+    for(var i=0; i<N; i++) {
+        var row = new Array(N);
+        row.fill(-1);
+        adjMatTrns.push(row);
+    }
+        
+
+    console.log(adjMatTrns);
+    graph.allEdges.forEach(edge => {
+        if(edge != null) {
+            console.log('edge ' + edge.edgeNum + ' nodes=' + edge.nodes);
+            nd1 = edge.nodes[0];
+            nd2 = edge.nodes[1];
+            adjMatTrns[nd2][nd1] = edge.edgeNum;
+            if(edge.arrowDir != ARROW_TYPE_DST) { // bidirectional
+                adjMatTrns[nd1][nd2] = edge.edgeNum;
+            }
+        }
+    });
+
+    console.log('adjMatTrns=');
+    for(var i=0; i<N; i++)
+        console.log(adjMatTrns[i]);
+
+    function DFS(nodeNum, lst) {
+        console.log('SCC.DFS() nodeNum= ' + nodeNum + ' lst= ' + lst);
+        if(nodeNum < 0)
+            return;
+
+        if(!visited[nodeNum]) {
+            visited[nodeNum] = true;
+            adj = graph.adjMat[nodeNum];
+            adj.forEach(edgeNum => {
+                edge = graph.allEdges[edgeNum];
+                if(edge != null) {
+                    nd_adj = edge.nodes[1];
+                    if((edge.arrowDir != ARROW_TYPE_DST) && (nd_adj == nodeNum))
+                        nd_adj = edge.nodes[0];
+                    console.log('nodeNum= ' + nodeNum + ' nd_adj= ' + nd_adj);
+                    DFS(nd_adj, lst);
+                }
+            });
+
+            lst.unshift(nodeNum)
+        }
+    }
+
+    function Assign(nodeNum, root) {
+        console.log('SCC.Assign() nodeNum= ' + nodeNum + ' root= ' + root);
+        if (nodeNum < 0) 
+            return;
+
+        var nd = graph.allNodes[nodeNum];
+        if(nd == null)
+            return;
+
+        if(comp[nodeNum] < 0) {
+            comp[nodeNum] = root;
+            nd.color = graph.allNodes[root].color;
+        } 
+        else return;  // we have already assigned component
+
+        eLst = adjMatTrns[nodeNum];
+        console.log('eLst= ' + eLst);
+        eLst.forEach(edgeNum => {
+            edge = graph.allEdges[edgeNum];
+            if(edge != null) {
+                nd_adj = edge.nodes[0]; // since this is tranpose, the adjacent edge should be the first 
+                if((edge.arrowDir != ARROW_TYPE_DST) && (nd_adj == nodeNum))
+                    nd_adj = edge.nodes[1];
+                // console.log('nodeNum= ' + nodeNum + ' edge.nodes= ' + edge.nodes + ' nd_adj= ' + nd_adj);
+
+                Assign(nd_adj, root);
+            }
+        });
+    }
+    
+    // Koseraju's algorithm - first construct a list of nodes by DFS'ing all nodes, prepending each node to list as it is discovered
+    var lst = []
+    graph.allNodes.forEach(nd => {
+        if (nd != null) {
+            var ndNum = nd.nodeNum;
+            console.log('ndNum= ' + ndNum + ' lst= ' + lst);
+            
+            if(!visited[ndNum]) {
+                // depth first search to visit all nodes connected to this node
+                DFS(ndNum, lst);
+            }
+        }
+    });
+
+     var clrNum = 0;
+     // assign SCC based on transpose
+     const hue = [0.0, 0.083, 0.167, 0.319, 0.5, 0.658, 0.764, 0.847];
+     const lgt = [0.5, 0.25, 0.75];
+     const sat = [1.0, 0.75, 0.5, 0.25];
+     
+     lst.forEach(ndNum => {
+        
+        if(comp[ndNum] < 0) {
+            var nd = graph.allNodes[ndNum];
+
+            // create new color
+            var h = hue[clrNum % hue.length];
+            var idx = Math.floor(clrNum / hue.length)  % lgt.length;
+            var l = lgt[idx];
+            idx = Math.floor(clrNum / (hue.length * lgt.length)) % sat.length;
+            var s = sat[idx];
+            var clr = hslToRgb(h, s, l);
+            var clr_hx = rgbToHex(... clr);
+            nd.origcolor = nd.color;
+            console.log('clr= ' + clr + ' clr_hx= ' + clr_hx);
+            nd.color = clr_hx;
+
+            Assign(ndNum, ndNum);
+            
+            // increemnt color
+            clrNum++;
+        }
+    });
 }
 
 function TopoSortAlg() {

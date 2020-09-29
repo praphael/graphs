@@ -693,7 +693,7 @@ Graph.prototype.transpose = function(edge) {
     nd2 = edge.nodes[1];
     edge.transpose();
     tmp = this.adjMat[nd1][nd2];
-    this.adjMat[nd1][nd2] = this.adjMat[nd2][nd1]
+    this.adjMat[nd1][nd2] = this.adjMat[nd2][nd1];
     this.adjMat[nd2][nd1] = tmp;
 }
 
