@@ -1,244 +1,15 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <style>
-      body {
-        padding: 5px;
-        font-size: 16px;
-        font-family: sans-serif;
-      }
-
-      label {
-        padding: 4px;
-      }
-
-      input {
-        padding: 4px;
-      }
-
-      select {
-        padding: 4px;
-      }
-
-      div.instructions {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        width: 800px;
-        height: 50px;
-      }
-
-      div.header {
-        position: absolute;
-        margin: auto;
-        text-align: center;
-        font-size: 24px;
-        font-weight: bold;
-        top: 10px;
-        left: 10px;
-        width: 800px;
-        height: 50px;
-      }
-
-      div.controls {
-        position: absolute;
-        top: 50px;
-        left: 10px;
-        width: 200px;
-        height: 600px;
-      }
-
-      canvas {
-        position: absolute;
-        top: 50px;
-        left: 175px;
-        border: 2px solid #000000; 
-      }
-
-      div.editModeLabel {
-        position: absolute;
-        top: 60px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-      }
-
-      div.editMode {
-        position: absolute;
-        top: 85px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-      }
-
-      div.labelModeLabel {
-        position: absolute;
-        top: 160px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-      }
-
-      div.labelMode {
-        position: absolute;
-        top: 180px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-      }
-
-      div.quickLabelLabel {
-        position: absolute;
-        top: 250px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-        /* border: 3px solid #73AD21; */
-      }
-
-      div.quickLabelMode {
-        position: absolute;
-        top: 270px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-        /* border: 3px solid #73AD21; */
-      }
-
-      div.displayOpts {
-        position: absolute;
-        top: 310px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-      }
-
-      div.nodeColor {
-        position: absolute;
-        top: 370px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-      }
-
-      div.nodeOpacity {
-        position: absolute;
-        top: 450px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-      }
-
-      div.imageOverlay {
-        position: absolute;
-        top: 500px;
-        left: 0px;
-        width: 150px;
-        height: 200px;
-      }
-
-      div.clearButton {
-        position: absolute;
-        top: 650px;
-        left: 0px;
-        width: 100px;
-        height: 100px;
-        /* border: 3px solid #73AD21; */
-      }
-      
-      #clear {
-        width: 150px;
-        height: 40px;
-      }
-
-      #generate_random {
-        width: 150px;
-        height: 40px;
-      }
-
-      #run_alg {
-        width: 150px;
-        height: 40px;
-      }
-
-      #clear_alg {
-        width: 150px;
-        height: 40px;
-      }
-
-      #load_graph {
-        width: 120px;
-        height: 40px;
-      }
-
-      #save_graph {
-        width: 120px;
-        height: 40px;
-      }
-
-      div.label_wgt_popup {
-        display: none;
-        position: fixed;
-        top: 40%;
-        left: 40%;
-        background-color: rgba(200, 200, 200, 1.0);
-        z-index: 1;
-      }
-
-      div.tools {
-        position: absolute;
-        top: 25px;
-        left: 1000px;
-      }
-
-      #alg_results {
-        position: absolute;
-        top: 675px;
-        left: 200px;
-        width: 700px;
-        height: 150px;
-      }
-
-      #alg_desc {
-        width: 300px;
-        height: 100px;
-        /*
-        top: 500px;
-        left: 1000px;
-        width: 300px;
-        height: 300px;
-        */
-      }
-
-      #alg_log {
-        /* position: absolute; */
-        width: 300px;
-        height: 150px;
-        /*
-        top: 500px;
-        left: 1000px;
-        width: 300px;
-        height: 300px;
-        */
-      }
-      
-    </style>
+      <!--- Bootstrap -->
+     <link href="bootstrap.min.css" rel="stylesheet">
+    <!--- integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous" -->
   </head>
   <body>
-    <div class="label_wgt_popup" id="label_wgt_form">
-      <fieldset>
-        <label for="ne_label">Label:</label>
-        <input type="text" name="ne_label" id="ne_label" value="A" class="text" size=20><br/>
-        <label for="Weight">Weight:</label>
-        <input type="text" name="ne_weight" id="ne_weight" value="0" class="text" size=5><br/>
-        <label for="Radius">Radius:</label>
-        <input type="text" name="ne_radius" id="ne_radius" value="0" class="text" size=3><br/>
-        <button id="label_wgt_popup_ok">OK</button>
-      </fieldset>
-    </div>
-
-    <div class="header"> 
-      Fun With Graphs
+    <div class="container-fluid"></div>
+      <h1 class="header primary text-center text-primary"> 
+        Fun With Graphs
+      </h1>
     </div>
     <!--
     <div class="instructions"> 
@@ -248,184 +19,230 @@
         Right click to delete a node or edge. To edit a node properties, such as radius, click on node in 'Edit' mode 
     </div>
     -->
-    <div class="controls"> 
-        <div class="options1">
-            <label for="nodeRadius">Node radius:</label>
-            <input id="nodeRadius" size=2 value="20"></input><br/>
-            <label for="arrowDir"><b>Arrow:</b></label>
-            <select id="arrowDir">
-                <option value="None">None</option>
-                <option value="Dest" selected>Dest</option>
-                <option value="Bidir">Both</option>
-                <option value="Two">Two arrows</option>
-            </select><br/>
-            <div class="editModeLabel">
-                <b>Mode:</b>
-            </div>
-            <div class="editMode">
-                <input type="radio" id="mode_place" name="edit_mode" value="mode_place"  checked=True>
-                <label for="mode_place">Place</label><br/>
-                <input type="radio" id="mode_move" name="edit_mode" value="mode_move">
-                <label for="mode_move">Move</label><br/>
-                <input type="radio" id="mode_label" name="edit_mode" value="mode_label">
-                <label for="mode_label">Edit</label>
-            </div>
-            <!---
-                <label for="mode">Mode:</label>
-            <select id="mode">
-                <option value="Place">Place</option>
-                <option value="Move">Move</option>
-                <option value="Label">Label</option>
-            </select>
-            -->
-            <div class="labelModeLabel">
-                <b>Label mode:</b>
-            </div>
-            <div class="labelMode">
-                <input type="radio" id="labelmode_none" name="labelMode" value="labelmode_none">
-                <label for="labelmode_none">None</label><br/>
-                <input type="radio" id="labelmode_quick" name="labelMode" value="labelmode_quick" checked=True>
-                <label for="labelmode_quick">Quick</label><br/>
-                <input type="radio" id="labelmode_custom" name="labelMode" value="labelmode_custom">
-                <label for="labelmode_custom">Custom</label>
-                
-                <!---
-                <label for="labelMode">Label Mode:</label>
-                <select id="labelMode">
-                    <option value="None">None</option>
-                    <option value="Quick" selected>Quick</option>
-                    <option value="Custom">Custom</option>
+
+    <div style="display: flex"> 
+      <div style="width: 15rem">
+        <div class="form-floating mb-3">
+          <input class="form-control" id="nodeRadius" value="20"></input>
+          <label class="form-label" for="nodeRadius">Node radius:</label>
+        </div>
+
+        <label class="form-label" for="arrowDir">Arrow:</label>
+        <select class="form-select" id="arrowDir">
+            <option value="None">None</option>
+            <option value="Dest" selected>Dest</option>
+            <option value="Bidir">Both</option>
+            <option value="Two">Two arrows</option>
+        </select>
+
+        <h6>Mode</h6>
+        
+        <div class="btn-group btn-group-toggle" role="group" data-toggle="buttons">
+          <button class="btn btn-sm btn-outline-secondary active" id="mode_place">Place</button>
+          <button class="btn btn-sm btn-outline-secondary" id="mode_move">Move</button>
+          <button class="btn btn-sm btn-outline-secondary" id="mode_label">Label</button>
+        </div>           
+
+        <!--- Label Mode -->
+        <h6>Label Mode</h6>
+        <div class="btn-group btn-group-toggle" role="group" data-toggle="buttons">
+          <button class="btn btn-sm btn-outline-secondary" id="labelmode_none">None</button>
+          <button class="btn btn-sm btn-outline-secondary active" id="labelmode_quick">Quick</button>
+          <button class="btn btn-sm btn-outline-secondary" id="labelmode_custom">Custom</button>
+        </div>           
+
+        <!--- Quick label -->
+        <h6>Quick Label</h6>
+        <div class="btn-group btn-group-toggle" role="group" data-toggle="buttons">
+          <button class="btn btn-sm btn-outline-secondary active" id="lbl_number">Number</button>
+          <button class="btn btn-sm btn-outline-secondary" id="lbl_char">Character</button>
+        </div>
+        
+        <!--- Display opts-->
+        <h6>Display:</h6>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="show_edge_weights" name="showEdgeWeights" value="show_edge_weights">
+            <label class="form-check-label" for="show_edge_weights">Edge Weight</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="show_node_weights" name="showNodeWeights" value="show_node_weights">
+            <label class="form-check-label" for="show_node_weights">Node Weight</label>
+        </div>
+
+        <!--- Node color-->
+        <h6>Node color</h6>
+        <select class="form-select" id="node_color_select">
+        <input type="color" id="node_color" name="node_color" size=1 value="#FFECA6">
+        </select>
+        
+
+        <label class="form-check-label" for="node_opacity">Opacity</label>          
+        <input type="range"  id="node_opacity" min="1" max="100" value="100">
+        
+        <!-- Image overlay -->
+        <label class="form-label" for="img_overlay">Image overlay URL</label>
+        <input class="form-check-input" type="text" id="img_overlay" size=15>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="img_overlay_enable_check" checked=True>
+          <label for="img_overlay_enable_check">Enable:</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="img_overlay_shrink_check" checked=True>
+          <label for="img_overlay_shrink_check">Shrink To Fit:</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="img_overlay_aspect_check" checked=True>
+          <label for="img_overlay_aspect_check">Maintain Aspect Ratio:</label>
+        </div>
+
+        <!--- clear button -->
+        <button class= "btn btn-primary" id="clear">Clear All Nodes</button>
+      </div> <!--- column  -->
+      
+      <div>
+        <canvas id="myCanvas" width=800 height=600></canvas>
+      </div>
+          <!--
+        <select id="Algorithm">
+          <option value="None">None</option>
+          <option value="Dest" selected>Dest</option>
+          <option value="Source">Souce</option>
+          <option value="Bidir">Both</option>
+          <option value="Two">Two arrows</option>
+        </select><br/>
+      -->
+
+      <div style="width: 15rem">
+        <div c;ass="container-fluid">
+          <h5>Random Graph:</h5>
+
+          <h6>Nodes</h6>
+          <div class="container-fluid">
+            <div class="input-group input-group-sm row">
+              <!--- 
+              <span class="input-group-text col-3" id="inputGroup-sizing-sm">Count</span>
+              <input class="form-control col-2" type="text" id="rnd_num_nodes" value="2">
+              <input class="form-control col-2" type="text" id="rnd_num_nodes" value="2">
+              <span class="input-group-text col-2" id="inputGroup-sizing-sm">Layout</label>          
+              <select class="form-select col-3" id="rnd_strategy">
+                <option value="Grid" selected>Grid</option>
+                <option value="Ring">Ring</option>
+                <option value="Tree">Tree</option>
+              </select>
+              -->
+                <span class="input-group-text col-3" id="inputGroup-sizing-sm">Count</span>
+                <input class="form-control col-2" type="text" id="rnd_num_nodes" value="2">
+                <span class="input-group-text col-3" id="inputGroup-sizing-sm">Layout</span>
+                <select class="form-select col-4" id="rnd_strategy">
+                  <option value="Grid" selected>Grid</option>
+                  <option value="Ring">Ring</option>
+                  <option value="Tree">Tree</option>
                 </select>
-                -->
             </div>
-        </div>
-        <div class="quickLabelLabel">
-            <b>Quick Label:</b>
-        </div>
-        <div class="quickLabelMode">
-            <input type="radio" id="lbl_number" name="quicklabel" value="lbl_number" checked=True>
-            <label for="lbl_number">Number</label><br/>
-            <input type="radio" id="lbl_char" name="quicklabel" value="lbl_char">
-            <label for="lbl_char">Character</label>
-        </div>
-        <div class="displayOpts">
-            <b>Display:</b><br/>
-            <input type="checkbox" id="show_edge_weights" name="showEdgeWeights" value="show_edge_weights">Edge Weights</input><br/>
-            <input type="checkbox" id="show_node_weights" name="showNodeWeights" value="show_node_weights">Node Weights</input>
-        </div>
-        <div class="nodeColor">
-          <b>Node color:</b><br/>
-          <select id="node_color_select">            
-          </select><br/>
-          <input type="color" id="node_color" name="node_color" size=1 value="#FFECA6">
-        </div>
-        <div class="nodeOpacity">
-          Opacity<br/>
-          <input type="range"  id="node_opacity" min="1" max="100" value="100">
-        </div>
-        <div class="imageOverlay">
-          <label for="img_overlay">Image overlay URL</label><br/>
-          <input type="text" id="img_overlay" size=15><br/>
-          <input type="checkbox" id="img_overlay_enable_check" checked=True><label for="img_overlay_enable_check">Enable:</label><br/>
-          <input type="checkbox" id="img_overlay_shrink_check" checked=True><label for="img_overlay_shrink_check">Shrink To Fit:</label><br/>
-          <input type="checkbox" id="img_overlay_aspect_check" checked=True><label for="img_overlay_aspect_check">Maintain Aspect Ratio:</label><br/>
-        </div>
-        <div class="clearButton">
-            <button id="clear" width=150>Clear</button>
-          </div>      
-      </div> <!--- options1 -->
-    </div> <!--  contorls-->
+            <div class="input-group input-group-sm row">
+              <span class="input-group-text col-3" id="inputGroup-sizing-sm">Weight</span>
+              <span class="input-group-text col-2" id="inputGroup-sizing-sm">Min</span>
+              <input class="form-control col-2" type="text" id="rnd_node_wgt_min" value="1">
+              <span class="input-group-text col-2" id="inputGroup-sizing-sm">Max</span>
+              <input class="form-control col-2" type="text" id="rnd_node_wgt_max" value="10">
+            </div>
+          </div>
 
-    <div class="tools">
-      <!--
-      <select id="Algorithm">
-        <option value="None">None</option>
-        <option value="Dest" selected>Dest</option>
-        <option value="Source">Souce</option>
-        <option value="Bidir">Both</option>
-        <option value="Two">Two arrows</option>
-      </select><br/>
-    -->
-      <h3>Random Graph:</h3>
-      Stategy:
-      <select id="rnd_strategy">
-        <option value="Grid" selected>Grid</option>
-        <option value="Ring">Ring</option>
-        <option value="Ring">Tree</option>
-      </select>
-      <label for="rnd_num_nodes">Nodes:</label>
-      <input type="text" name="rnd_num_nodes" id="rnd_num_nodes" value="20" class="text" size=2><br/>
-      <label for="rnd_node_wgt_min">Weight Min:</label>
-      <input type="text" name="rnd_node_wgt_min" id="rnd_node_wgt_min" value="1" class="text" size=2 disabled>
-      <label for="rnd_node_wgt_max">Max:</label>
-      <input type="text" name="rnd_node_wgt_max" id="rnd_node_wgt_max" value="10" class="text" size=2 disabled><br/>
-      <br/>
-      <b>Edges</b><br/>
-      <label for="rnd_outdeg_min">Out Min:</label>
-      <input type="text" name="rnd_outdeg_min" id="rnd_outdeg_min" value="0" class="text" size=2>
-      <label for="rnd_outdeg_max">Max:</label>
-      <input type="text" name="rnd_outdeg_max" id="rnd_outdeg_max" value="3" class="text" size=2><br/>
-      
-      <label for="rnd_indeg_min">In Min:</label>
-      <input type="text" name="rnd_indeg_min" id="rnd_indeg_min" value="0" class="text" size=2>
-      <label for="rnd_indeg_max">Max:</label>
-      <input type="text" name="rnd_indeg_max" id="rnd_indeg_max" value="3" class="text" size=2><br/>
+          <h6>Edges</h6>
+          <div class="container-fluid">
+            <div class="input-group input-group-sm row">
+              <span class="input-group-text col-4" id="inputGroup-sizing-sm">Out Deg</span>
+              <span class="input-group-text col-2" id="inputGroup-sizing-sm">Min</span>
+              <input class="form-control col-2" type="text" name="rnd_outdeg_min" id="rnd_outdeg_min" value="0" class="text">
+              <span class="input-group-text col-2" id="inputGroup-sizing-sm">Max</span>
+              <input class="form-control col-2" type="text" name="rnd_outdeg_max" id="rnd_outdeg_max" value="3" class="text">
+            </div>
 
-      <label for="rnd_edge_wgt_min">Weight Min:</label>
-      <input type="text" name="rnd_edge_wgt_min" id="rnd_edge_wgt_min" value="1" class="text" size=2 disabled>
-      <label for="rnd_edge_wgt_max">Max:</label>
-      <input type="text" name="rnd_edge_wgt_max" id="rnd_edge_wgt_max" value="10" class="text" size=2 disabled><br/>
-      <br/>
-      <button id="generate_random" width=150 height=50>Generate</button><br/>
+            <div class="input-group input-group-sm row">
+              <span class="input-group-text col-4" id="inputGroup-sizing-sm">In Deg</span>
+              <span class="input-group-text col-2" id="inputGroup-sizing-sm">Min</span>
+              <input class="form-control col-2" type="text" name="rnd_indeg_min" id="rnd_indeg_min" value="0" class="text">
+              <span class="input-group-text col-2" id="inputGroup-sizing-sm">Max</span>
+              <input class="form-control col-2" type="text" name="rnd_indeg_max" id="rnd_indeg_max" value="3" class="text">
+            </div>
 
-      <p><h3>Load/Save</h3></p>
-      <input type="file" id="graph_filename"><br/>
-      <button id="save_graph">Save</button>
-      <button id="load_graph">Load</button></br>
+            <div class="input-group input-group-sm row">
+              <span class="input-group-text col-4" id="inputGroup-sizing-sm">Weight</span>
+              <span class="input-group-text col-2" id="inputGroup-sizing-sm">Min</span>
+              <input class="form-control col-2" type="text" name="rnd_edge_wgt_min" id="rnd_edge_wgt_min" value="1" class="text">
+              <span class="input-group-text col-2" id="inputGroup-sizing-sm">Max</span>
+              <input class="form-control col-2" type="text" name="rnd_edge_wgt_max" id="rnd_edge_wgt_max" value="10" class="text">
+            </div>
+          </div>
 
-      <p><h3>Algorithm:</h3></p>
-      <select id="algorithm">
-        <option value="Transpose" selected>Transpose</option>
-        <option value="DFS">Depth First Search</option>
-        <option value="BFS">Breadth First Search</option>
-        <option value="SCC">Strongly connected components</option>
-        <option value="Top_Sort">Topological sort</option>
-        <option value="MinSpan_Prim">Minimum Spanning Tree (Prim)</option>
-        <option value="SSSP_Djk">Single Source Shortest Path (Djikstra)</option>
-        <option value="SSSP_Djk">Single Source Shortest Path (Bellman-Ford)</option>
-        <option value="AP_Djk">All Pairs Shortest Path (Floyd Warshall)</option>
-        <option value="Ham_cycle">Hamiltonian cycle</option>
-        <option value="Euler_Tour">Euler tour</option>
-        <option value="TSP">Travelling salesman problem</option>
-      </select><br/>
+          <button class="btn btn-primary" id="generate_random" width=150 height=50>Generate</button>
 
-      <textarea id="alg_desc">Algorithm description</textarea><br/>
+          <h5>Load/Save</h5>
+          <div class="form-floating mb-3">
+            <input class="form-control" type="file" id="graph_filename">
+          </div>
+          <button class="btn btn-primary" id="save_graph">Save</button>
+          <button class="btn btn-primary" id="load_graph">Load</button>
 
-      <input type="radio" id="alg_show" name="alg_show_opt" value="alg_show"  checked=True>
-      <label for="alg_show">Show me whats going on</label><br/>
-      <input type="radio" id="alg_quiet" name="alg_show_opt" value="alg_quiet">
-      <label for="alg_quiet">Just run</label><br/>
-      
-      <button id="run_alg">Run</button><button id="clear_alg">Clear</button><br/><br/>
-      <textarea id="alg_log">Algorithm log</textarea>
+          <h5>Algorithm:</h5>
+          <select class="form-select" id="algorithm">
+            <option value="Transpose" selected>Transpose</option>
+            <option value="DFS">Depth First Search</option>
+            <option value="BFS">Breadth First Search</option>
+            <option value="SCC">Strongly connected components</option>
+            <option value="Top_Sort">Topological sort</option>
+            <option value="MinSpan_Prim">Minimum Spanning Tree (Prim)</option>
+            <option value="SSSP_Djk">Single Source Shortest Path (Djikstra)</option>
+            <option value="SSSP_Djk">Single Source Shortest Path (Bellman-Ford)</option>
+            <option value="AP_Djk">All Pairs Shortest Path (Floyd Warshall)</option>
+            <option value="Ham_cycle">Hamiltonian cycle</option>
+            <option value="Euler_Tour">Euler tour</option>
+            <option value="TSP">Travelling salesman problem</option>
+          </select>
+
+          <textarea id="alg_desc">Algorithm description</textarea>
+
+          <div class="form-check">
+            <input class="form-check-input" type="radio" id="alg_show" name="alg_show_opt" value="alg_show"  checked=True>
+            <label class="form-check-label" for="alg_show">Show me whats going on</label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="radio" id="alg_quiet" name="alg_show_opt" value="alg_quiet">
+            <label class="form-check-label" for="alg_quiet">Just run</label>
+          </div>
+          <button class= "btn btn-success" id="run_alg">Run</button>
+          <button class= "btn btn-primary" id="clear_alg">Clear</button>
+          <textarea id="alg_log">Algorithm log</textarea>
+        </div>  <!--- container -->
+      </div>
+    </div>
+    
+    <div class="container-fluid">
+      <textarea id="alg_results">Algorithm results</textarea>
     </div>
 
-    <textarea id="alg_results" >Algorithm results</textarea>
-    
-
-
-
-    <!---
-    <label for="quickLabel">Quick label:</label>
-    <select id="quickLabel">
-        <option value="Number">Number</option>
-        <option value="Alphabet">Alphabet</option>
-    </select>
-    -->
   
-    <br/>
-    <canvas id="myCanvas" width=800 height=600></canvas>
+    <div class="container-fluid d-none" id="label_wgt_form">
+      <fieldset>
+        <div class="form-floating mb-3">
+          <input class="form-control" type="text" name="ne_label" id="ne_label" value="A" class="text">
+          <label class="form-label" for="ne_label">Label:</label>
+        </div>
 
+        <div class="form-floating mb-3">
+          <label class="form-control" for="Weight">Weight:</label>
+          <input class="form-label" type="text" name="ne_weight" id="ne_weight" value="0" class="text" size=5>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input class="form-control" type="text" name="ne_radius" id="ne_radius" value="0" class="text" size=3>
+          <label class="form-label" for="Radius">Radius:</label>
+        </div>
+
+        <button class="btn btn-primary" id="label_wgt_popup_ok">OK</button>
+      </fieldset>
+    </div>
     
     <!--
     <script type="text/javascript"
@@ -449,12 +266,15 @@
     <script src="edge.js"></script>
     <script src="graphs.js"></script>
     <script src="algorithms_1.js"></script>
+    <script src="algorithms_2.js"></script>
     <script src="FileSaver.js"></script>
 
 
     <script>
+       /*
        const CANVAS_WIDTH = 800;
        const CANVAS_HEIGHT = 600;
+       */
 
        var labelObj;
        var graph = new Graph();
@@ -465,6 +285,8 @@
        algorithms.push(new DFSAlg());
        algorithms.push(new BFSAlg());
        algorithms.push(new SCCAlg());
+       algorithms.push(new TopoSortAlg);
+       algorithms.push(new MinSpanAlg());
 
         const CSS_COLORS = {"AliceBlue":"#f0f8ff","AntiqueWhite":"#faebd7","Aqua":"#00ffff","Aquamarine":"#7fffd4","Azure":"#f0ffff",
           "Beige":"#f5f5dc","Bisque":"#ffe4c4","Black":"#000000","BlanchedAlmond":"#ffebcd","Blue":"#0000ff","BlueViolet":"#8a2be2","Brown":"#a52a2a",
@@ -512,10 +334,10 @@
 
       function getEditMode() {
           var editMode = MODE_PLACE;
-          if(document.getElementById('mode_move').checked) {
+          if(document.getElementById('mode_move').classList.contains('active')) {
               editMode = MODE_MOVE;
           }
-          else if(document.getElementById('mode_label').checked) {
+          else if(document.getElementById('mode_label').classList.contains('active')) {
               editMode = MODE_LABEL;
           }
 
@@ -535,9 +357,9 @@
       }
 
       function labelWeightPopupClick() {
-          var label = document.getElementById("ne_label").value;
-          var wgt = parseInt(document.getElementById("ne_weight").value);
-          var rad = parseInt(document.getElementById("ne_radius").value);
+          const label = document.getElementById("ne_label").value;
+          const wgt = parseInt(document.getElementById("ne_weight").value);
+          const rad = parseInt(document.getElementById("ne_radius").value);
           console.log('labelWeightPopupClick label= ', label, ' wgt=', wgt);
           // hide the form
           document.getElementById("label_wgt_form").style.display = "none";            
@@ -558,15 +380,15 @@
       }
 
       function generateRandomGraph() {
-        var el = document.getElementById('arrowDir');
-        var opts = new Object();
+        let el = document.getElementById('arrowDir');
+        const opts = new Object();
 
         opts.arrowDir = el.selectedIndex;
         opts.quickLabelMode = QUICK_LABEL_NUMBER;
         if(document.getElementById('lbl_char').checked) {
           opts.quickLabelMode = QUICK_LABEL_CHAR;
         }
-        var el = document.getElementById('rnd_strategy');
+        el = document.getElementById('rnd_strategy');
         opts.strategy = el.selectedIndex;
         opts.numNodes = parseInt(document.getElementById("rnd_num_nodes").value);
 
@@ -592,7 +414,7 @@
 
 
       function setOverlayImageOpts() {
-        var url = document.getElementById('img_overlay').value;
+        const url = document.getElementById('img_overlay').value;
         if(url != graph.imageURL)
           graph.setImageURL(url);
         graph.enableImgOverlay = document.getElementById('img_overlay_enable_check').checked;
@@ -601,12 +423,12 @@
       }
 
       canvas.addEventListener('mousemove', function(evt) {
-        var mousePos = getMousePos(canvas, evt);
+        let mousePos = getMousePos(canvas, evt);
         // var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
         // writeMessage(canvas, message);
 
         // var el = document.getElementById('mode');
-        var editMode = getEditMode();
+        const editMode = getEditMode();
 
         if(editMode == MODE_MOVE) {
             if(graph.objSel != null) {
@@ -618,34 +440,34 @@
       }, false);
 
       canvas.addEventListener('click', function(evt) {
-        var mousePos = getMousePos(canvas, evt);
+        let mousePos = getMousePos(canvas, evt);
         // var message = 'Mouse click';
         // writeMessage(canvas, message);
         
         // ctx.moveTo(mousePos.x, mousePos.y);
-        var editMode = getEditMode(); 
-        var labelMode = getLabelMode();
+        let editMode = getEditMode(); 
+        let labelMode = getLabelMode();
 
         // el = document.getElementById('lbl_number').checked;
-        var quickLabelMode = QUICK_LABEL_NUMBER;
+        let quickLabelMode = QUICK_LABEL_NUMBER;
         if(document.getElementById('lbl_char').checked) {
             quickLabelMode = QUICK_LABEL_CHAR;
         }
-        var rad = parseInt(document.getElementById('nodeRadius').value);
+        let rad = parseInt(document.getElementById('nodeRadius').value);
 
         // var quickLabel = document.getElementById('quickLabelMode').selectedValue;
         console.log('mode= ', editMode, ' labelMode= ', labelMode, ' radi=', rad);
-        var el = document.getElementById('arrowDir');
-        var arrowDir = el.selectedIndex;
+        let el = document.getElementById('arrowDir');
+        let arrowDir = el.selectedIndex;
         //print(console.log('arrowDir= ', arrowDir));
 
         // determine if click hit an object
-        var obj = graph.HitTestAllObjs(mousePos);
+        let obj = graph.HitTestAllObjs(mousePos);
         console.log("HitTestAllObjs returned obj=", obj);
         el = document.getElementById('node_color');
-        var color = el.value;
+        let color = el.value;
         el = document.getElementById('node_opacity');
-        var opacity = el.value;
+        let opacity = el.value;
 
         if(editMode == MODE_PLACE) {
             if(obj != null) {
@@ -694,8 +516,8 @@
       canvas.addEventListener('contextmenu', function(evt) {
         evt.preventDefault();
         // alert('success!');
-        var mousePos = getMousePos(canvas, evt);
-        var obj = graph.HitTestAllObjs(mousePos);
+        let mousePos = getMousePos(canvas, evt);
+        let obj = graph.HitTestAllObjs(mousePos);
         console.log("HitTestAllObjs returned obj=", obj);
         if(obj != null) {
             // delete node
@@ -720,9 +542,9 @@
       }
 
       // populate colors seleector 
-      var el = document.getElementById('node_color_select');
-      var str = '';
-      for(var c in CSS_COLORS) {
+      let el = document.getElementById('node_color_select');
+      let str = '';
+      for(let c in CSS_COLORS) {
           // console.log('c= ', c);
           if(c == 'LemonChiffon')
             str += '<option value="' + c + '" selected>' + c + '</option>';      
@@ -777,17 +599,41 @@
         }
 
         document.getElementById('save_graph').onclick = function () { 
-          var str = JSON.stringify(graph);
-          var blob = new Blob([str], {type: "text/plain;charset=utf-8"});
+          const  str = JSON.stringify(graph);
+          const  blob = new Blob([str], {type: "text/plain;charset=utf-8"});
           saveAs(blob, "graph.json");
         }
 
+        const toggle_btn = (btn_id, all_btn) => {
+          return () => {
+            for (const btn of all_btn) 
+              document.getElementById(btn).classList.remove('active');
+            document.getElementById(btn_id).classList.add('active');
+          }
+        }
+
+        const mode_btns = ['mode_place', 'mode_move', 'mode_label'];
+        for (const btn of mode_btns) {
+          document.getElementById(btn).onclick = toggle_btn(btn, mode_btns);
+        }
+
+        const labelmode_btns = ['labelmode_none', 'labelmode_quick', 'labelmode_custom'];
+        for (const btn of labelmode_btns) {
+          document.getElementById(btn).onclick = toggle_btn(btn, labelmode_btns);
+        }
+
+        const quicklabel_btns = ['lbl_number', 'lbl_char'];
+        for (const btn of quicklabel_btns) {
+          document.getElementById(btn).onclick = toggle_btn(btn, quicklabel_btns);
+        }
+        
+
         document.getElementById('load_graph').onclick = function () { 
-          var file = document.getElementById('graph_filename').files[0];
-          var fRead = new FileReader();
+          let file = document.getElementById('graph_filename').files[0];
+          let fRead = new FileReader();
           fRead.addEventListener('loadend', function() {
             document.getElementById('alg_log').innerText = fRead.result;
-            var gr = JSON.parse(fRead.result);
+            let gr = JSON.parse(fRead.result);
             
             graph.loadGraph(gr);
             graph.redraw(canvas);
@@ -808,9 +654,9 @@
         }
 
 
-        var color = document.getElementById('node_color').value;
+        const color = document.getElementById('node_color').value;
         // add some default nodes
-        rad = 20;
+        const rad = 20;
         pos = { x: 100,  y: 100 };
         graph.handleAddNode(pos, LABEL_MODE_QUICK, QUICK_LABEL_NUMBER, rad, color);
         pos = { x: 300,  y: 200 };
@@ -843,5 +689,10 @@
         graph.redraw(canvas);
         
     </script>
+
+    <!--- Bootstrap -->
+    <!---  integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous" --->
+    <script src="bootstrap.bundle.min.js" ></script>
+
   </body>
 </html>

@@ -543,11 +543,9 @@ SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
         row = Array(N).fill(-1);
         transMat.push(row);
     }    
-
     var j = 0;
     transEdges = Array(graph.allEdges.length).fill(null);
     graph.allEdges.forEach(edge => {
-        // function Edge(nd1, nd2, edgeNum, allNodes=null, arrowDir=ARROW_TYPE_NONE) {
         // store transposed edges separate, so algorithm can run properly indepednent of display 
         if(edge != null) {
             var e = new Edge(edge.nodes[1], edge.nodes[0], edge.edgeNum, null, edge.arrowDir);
@@ -555,7 +553,7 @@ SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
             transMat[edge.nodes[1]][edge.nodes[0]] = edge.edgeNum;
 
             if(show) {
-                sleepTime += sleepTimeInc;
+                sleepTime += sleepTimeInc/2;
                 updateEdge(sleepTime, edge, true);
             } else {
                 graph.transpose(edge);
@@ -596,7 +594,7 @@ SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
     // transpose graph back
     graph.allEdges.forEach(edge => {
         if(show) {
-            sleepTime += sleepTimeInc;;
+            sleepTime += sleepTimeInc/2;
             updateEdge(sleepTime, edge, false);
         } else {
             graph.transpose(edge);
@@ -613,8 +611,3 @@ SCCAlg.prototype.run = function(graph, show, canvas, logText, resultsText) {
     }
 }
 
-function TopoSortAlg() {
-    this.description = "Topological sort.\nOrder the graph by performing a DFS.  When exhausted, nodes not discovered are pre-pended to the order." +
-        "Topological sort may not be unique, results may depend on order in which nodes are searched. ONly meaningful for directed graphs.";
-    ;
-}
